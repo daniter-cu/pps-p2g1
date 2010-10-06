@@ -6,18 +6,14 @@
  */
 package mosquito.sim;
 
-import java.awt.Point;
+
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
 
 import mosquito.sim.GameListener.GameUpdateType;
@@ -25,9 +21,14 @@ import mosquito.sim.ui.GUI;
 import mosquito.sim.ui.Text;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+ 
+ public final class GameEngine 
+ {	
+    static {
+		PropertyConfigurator.configure("logger.properties");
+    }
 
-public final class GameEngine 
-{
 	private GameConfig config;
 	private Board board;
 	// private PlayerWrapper player;
@@ -45,7 +46,6 @@ public final class GameEngine
 			try {
 				board.load(config.getSelectedBoard());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    log = Logger.getLogger(GameController.class);
@@ -150,7 +150,6 @@ public final class GameEngine
 			try {
 				engine.getConfig().setPlayerClass((Class<Player>) Class.forName(args[3]));
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			engine.getConfig().setNumMosquitos(Integer.valueOf(args[4]));
@@ -239,10 +238,8 @@ public final class GameEngine
 			log.error("Exception: " + e);
 			return false;
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		round = 0;
