@@ -12,6 +12,10 @@ import mosquito.sim.Player;
 
 public class WalkTowardsTheLight extends Player {
 	private int numLights;
+	private int INTERVAL = 60;
+	private int OFFSET = 9;
+	private int ON_TIME = 15;
+	private int BASE = 50;
 	
 	@Override
 	public String getName() {
@@ -28,16 +32,35 @@ public class WalkTowardsTheLight extends Player {
 	public Set<Light> getLights() {
 		HashSet<Light> ret = new HashSet<Light>();
 		lastLight = new Point2D.Double(47, 50);
-		Light l = new Light(40,50, 10,10,1);
-		ret.add(l);
-		Light l2 = new Light(60,50, 10,10,11);
-		ret.add(l2);
-		Light l3 = new Light(0,0,0,0,1);
-		Light l4 = new Light(0,0,0,0,1);
-		Light l5 = new Light(0,0,0,0,1);
-		ret.add(l3);
-		ret.add(l4);
-		ret.add(l5);
+		Light l = new Light(BASE - OFFSET,BASE, INTERVAL,ON_TIME,1);
+		Light l2 = new Light(BASE + OFFSET,BASE, INTERVAL,ON_TIME,1+ON_TIME);
+		Light l3 = new Light(BASE,BASE - OFFSET,INTERVAL,ON_TIME,1 + 2*ON_TIME);
+		Light l4 = new Light(BASE,BASE + OFFSET,INTERVAL,ON_TIME,1 + 3*ON_TIME);
+		
+		if(numLights == 1)
+		{
+			ret.add(new Light(50,49,10,5,1));
+		}
+		if(numLights > 3)
+		{
+			ret.add(l);
+			ret.add(l2);
+			ret.add(l3);
+			ret.add(l4);
+		}
+		else if(numLights == 2)
+		{
+			ret.add(l);
+			ret.add(l2);
+		}
+		else if(numLights == 3)
+		{
+			ret.add(l);
+			ret.add(l2);
+			ret.add(new Light(0,0,0,0,1));
+		}
+		for(int i=4; i<numLights; i++)
+			ret.add(new Light(0,0,0,0,1));
 		return ret;
 	}
 
