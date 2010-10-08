@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BOARD>
+  <DIMENSIONS height="100" width="100"></DIMENSIONS>
+  <WALLS>
+    <WALL x_1="0.0" x_2="44.0" y_1="0.0" y_2="44.0"></WALL>
+    <WALL x_1="100.00" x_2="10.0" y_1="0.0" y_2="85.0"></WALL>
+  </WALLS>
+</BOARD>
