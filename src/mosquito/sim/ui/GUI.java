@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -25,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -53,18 +56,31 @@ public final class GUI extends JFrame implements ActionListener, GameListener, C
 	private BoardEditor boardEditor;
 
 	private BoardFrame boardFrame;
-
+	public boolean is_recursive = false;
+	
 	private volatile boolean fast;
-
+	private GameEngine real_engine;
+	public void setEngine(GameEngine engine)
+	{
+		real_engine = this.engine;
+		this.engine = engine;
+		boardFrame.setBoard(engine.getBoard(), false);
+	}
+	public void restoreEngine()
+	{
+		this.engine = this.real_engine;
+		boardFrame.setBoard(engine.getBoard(), false);
+	}
 	public GUI(GameEngine engine)
 	{
 		this.engine = engine;
+		engine.gui = this;
 		engine.addGameListener(this);
 		JPanel topPanel = new JPanel(new BorderLayout());
 		tabPane = new JTabbedPane();
 
 		JPanel eastPanel = new JPanel(new GridLayout(1, 1));
-		configPanel = new ConfigurationPanel(engine.getConfig());
+		configPanel = new ConfigurationPanel(engine.getConfig(),engine);
 		eastPanel.add(configPanel);
 
 		controlPanel = new ControlPanel();
@@ -131,27 +147,35 @@ public final class GUI extends JFrame implements ActionListener, GameListener, C
 			configPanel.setEnabled(false);
 			controlPanel.tournament.setEnabled(false);
 			fast = false;
-			if (engine.setUpGame())
-			{
-				boardPanel.setEngine(engine);
-				boardFrame.setEngine(engine);
-				boardPanel.setBoard(engine.getBoard(), false);
-				boardFrame.setBoard(engine.getBoard(), false);
-				// boardFrame.playerLabel.setText(engine.getPlayerName());
-				// boardFrame.playerLabel.setForeground(engine.getPlayerColor());
-				boardFrame.round.setText("Round: 0");
-				controlPanel.stop.setEnabled(true);
-				controlPanel.play.setEnabled(true);
-				controlPanel.pause.setEnabled(false);
-				controlPanel.step.setEnabled(true);
-			} else
-			{
-				// game set up failed. Turn the right buttons on/off.
-				controlPanel.begin.setEnabled(true);
-				configPanel.setEnabled(true);
-				controlPanel.tournament.setEnabled(true);
-			}
-			this.repaint();
+//			Thread runner = new Thread(new Runnable() {
+//				
+//				@Override
+//				public void run() {
+					if (engine.setUpGame())
+					{
+						boardPanel.setEngine(engine);
+						boardFrame.setEngine(engine);
+						boardPanel.setBoard(engine.getBoard(), false);
+						boardFrame.setBoard(engine.getBoard(), false);
+						// boardFrame.playerLabel.setText(engine.getPlayerName());
+						// boardFrame.playerLabel.setForeground(engine.getPlayerColor());
+						boardFrame.round.setText("Round: 0");
+						controlPanel.stop.setEnabled(true);
+						controlPanel.play.setEnabled(true);
+						controlPanel.pause.setEnabled(false);
+						controlPanel.step.setEnabled(true);
+					} else
+					{
+						// game set up failed. Turn the right buttons on/off.
+						controlPanel.begin.setEnabled(true);
+						configPanel.setEnabled(true);
+						controlPanel.tournament.setEnabled(true);
+					}
+					repaint();					
+//				}
+//			});
+//			runner.run();
+			
 		} else if (command.compareToIgnoreCase("Step") == 0)
 		{
 			engine.step();
@@ -264,6 +288,7 @@ public final class GUI extends JFrame implements ActionListener, GameListener, C
 					// this should not happen!
 					e.printStackTrace();
 				}
+				
 			}
 			slider.removeChangeListener(this);
 		}
@@ -287,17 +312,19 @@ public final class GUI extends JFrame implements ActionListener, GameListener, C
 		switch (type)
 		{
 		case GAMEOVER:
-			fast = false;
-			controlPanel.play.setEnabled(false);
-			controlPanel.step.setEnabled(false);
-			controlPanel.pause.setEnabled(false);
-			controlPanel.stop.setEnabled(false);
-			controlPanel.begin.setEnabled(true);
-			controlPanel.tournament.setEnabled(true);
-			configPanel.setEnabled(true);
-			String s = "Achieved 50% capture at t=" + (engine.getCurrentRound()-1);
-			JOptionPane.showMessageDialog((Frame) c, s, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-
+			if(!is_recursive)
+			{
+				fast = false;
+				controlPanel.play.setEnabled(false);
+				controlPanel.step.setEnabled(false);
+				controlPanel.pause.setEnabled(false);
+				controlPanel.stop.setEnabled(false);
+				controlPanel.begin.setEnabled(true);
+				controlPanel.tournament.setEnabled(true);
+				configPanel.setEnabled(true);
+				String s = "Achieved 50% capture at t=" + (engine.getCurrentRound()-1);
+				JOptionPane.showMessageDialog((Frame) c, s, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+			}
 			break;
 		case MOVEPROCESSED:
 			controlPanel.roundText.setText("" + engine.getCurrentRound());
@@ -312,6 +339,9 @@ public final class GUI extends JFrame implements ActionListener, GameListener, C
 			break;
 		case MOUSEMOVED:
 			configPanel.setMouseCoords(BoardPanel.MouseCoords);
+		case REPAINT:
+			boardFrame.bp.repaint();
+			boardPanel.repaint();
 		default:
 			// nothing.
 		}

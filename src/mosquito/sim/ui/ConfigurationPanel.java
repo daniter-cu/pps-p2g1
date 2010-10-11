@@ -39,6 +39,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import mosquito.sim.GameConfig;
+import mosquito.sim.GameEngine;
 import mosquito.sim.Player;
 
 
@@ -70,11 +71,13 @@ public final class ConfigurationPanel extends JPanel implements ChangeListener, 
 
 	private JSlider speedSlider;
 	protected JLabel interactiveHelp;
+	private JButton generateMosquitosButton;
+	private GameEngine engine;
 	
-	public ConfigurationPanel(GameConfig config)
+	public ConfigurationPanel(final GameConfig config,final GameEngine engine)
 	{
 		this.config = config;
-
+		this.engine= engine;
 		this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Configuration"));
 		this.setPreferredSize(new Dimension(350, 1200));
 		GridBagLayout layout = new GridBagLayout();
@@ -132,6 +135,17 @@ public final class ConfigurationPanel extends JPanel implements ChangeListener, 
 				"Caution: Game-end will be determined by the<br>" +
 				" population size specified above, not actual count</html>");
 		interactiveHelp.setVisible(false);
+		generateMosquitosButton = new JButton("Fill Mosquitos");
+		generateMosquitosButton.setVisible(false);
+		generateMosquitosButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				engine.getBoard().createMosquitos(config.getNumMosquitos());
+				engine.notifyRepaint();
+			}
+		});
+		panel.add(generateMosquitosButton);
 		panel.add(interactiveHelp);
 		layout.setConstraints(panel, c);
 		this.add(panel);
@@ -199,9 +213,15 @@ public final class ConfigurationPanel extends JPanel implements ChangeListener, 
 			selectedPlayer = (Class) arg0.getItem();
 			config.setPlayerClass((Class<Player>) playerBox.getSelectedItem());
 			if(selectedPlayer.getName().equals("mosquito.g0.InteractivePlayer"))
+			{
 				this.interactiveHelp.setVisible(true);
+				this.generateMosquitosButton.setVisible(true);
+			}
 			else
+			{
 				this.interactiveHelp.setVisible(false);
+				this.generateMosquitosButton.setVisible(false);
+			}
 			//System.out.println("SELECTED:" + selectedPlayer.toString());
 		}
 		if (arg0.getSource().equals(boardBox) && arg0.getStateChange() == ItemEvent.SELECTED)

@@ -27,5 +27,5 @@ public class Collector extends GameObject {
 	{
 		return boundingBox.contains(p);
 	}
-	public static final int RADIUS = 1;
+	public static final double RADIUS = 1;
 }

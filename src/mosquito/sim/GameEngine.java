@@ -6,7 +6,6 @@
  */
 package mosquito.sim;
 
-
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.IOException;
@@ -22,20 +21,35 @@ import mosquito.sim.ui.Text;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
- 
- public final class GameEngine 
- {	
-    static {
-		PropertyConfigurator.configure("logger.properties");
-    }
 
+public final class GameEngine 
+{
 	private GameConfig config;
 	private Board board;
 	// private PlayerWrapper player;
 	private int round;
+	public GUI gui;
 	private ArrayList<GameListener> gameListeners;
 	private Logger log;
-	
+	public boolean isSimulated = false;
+	static {
+		PropertyConfigurator.configure("logger.properties");
+	}
+	public GameEngine(GameConfig config)
+	{
+		this.config = (GameConfig) config.clone();
+		gameListeners = new ArrayList<GameListener>();
+		board = new Board(10, 10);
+		board.engine=this;
+		this.isSimulated = true;
+			try {
+				board.load(config.getSelectedBoard());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    log = Logger.getLogger(GameController.class);
+	}
 	public GameEngine(String configFile)
 	{
 		config = new GameConfig(configFile);
@@ -46,6 +60,7 @@ import org.apache.log4j.PropertyConfigurator;
 			try {
 				board.load(config.getSelectedBoard());
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    log = Logger.getLogger(GameController.class);
@@ -70,7 +85,10 @@ import org.apache.log4j.PropertyConfigurator;
 	{
 		return board;
 	}
-
+	public int getNumCaught()
+	{
+		return board.mosquitosCaught;
+	}
 	public boolean step()
 	{
 		if(board.mosquitosCaught >= config.getNumMosquitos()/2 || (config.getMaxRounds() > 0 && getCurrentRound() >= config.getMaxRounds()))
@@ -85,7 +103,7 @@ import org.apache.log4j.PropertyConfigurator;
 			{
 				if(!m.caught)
 				{
-					int d = board.getDirectionOfLight(m.location);
+					double d = board.getDirectionOfLight(m.location);
 					m.moveInDirection(d,board.getWalls());
 					if(board.getCollector().contains(m))
 					{
@@ -116,6 +134,14 @@ import org.apache.log4j.PropertyConfigurator;
 	public void removeGameListener(GameListener l)
 	{
 		gameListeners.remove(l);
+	}
+	public void notifyRepaint()
+	{
+		Iterator<GameListener> it = gameListeners.iterator();
+		while (it.hasNext())
+		{
+			it.next().gameUpdated(GameUpdateType.REPAINT);
+		}
 	}
 	private void notifyListeners(GameUpdateType type)
 	{
@@ -150,6 +176,7 @@ import org.apache.log4j.PropertyConfigurator;
 			try {
 				engine.getConfig().setPlayerClass((Class<Player>) Class.forName(args[3]));
 			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			engine.getConfig().setNumMosquitos(Integer.valueOf(args[4]));
@@ -185,8 +212,13 @@ import org.apache.log4j.PropertyConfigurator;
 			board.mosquitosCaught = 0;
 			board.setLights(new HashSet<Light>());
 			curPlayer = config.getPlayerClass().newInstance();
+			curPlayer.setMyConfig((GameConfig) config.clone());
+			curPlayer.setGUI(gui);
 			curPlayer.Register();
-			curPlayer.startNewGame(board.getWalls(), config.getNumLights());
+			if(this.isSimulated)
+				curPlayer.startSimulatedGame(board.getWalls(), config.getNumLights());
+			else
+				curPlayer.startNewGame(board.getWalls(), config.getNumLights());
 			board.createMosquitos(0);
 			if(config.getPlayerClass().getName().equals("mosquito.g0.InteractivePlayer"))
 			{
@@ -229,6 +261,17 @@ import org.apache.log4j.PropertyConfigurator;
 						System.err.println("Error: Collector intersects light");
 						return false;
 					}
+					if(l.getX() < 0 || l.getX() > 100 || l.getY() < 0 || l.getY() > 100)
+					{
+						System.err.println("Error: Lights are OOB");
+						System.err.println(l.getX() + ", " + l.getY());
+						return false;
+					}
+				}
+				if(col.getX() < 0 || col.getX() > 100 || col.getY() < 0 || col.getY() > 100)
+				{
+					System.err.println("Error: Collector is OOB");
+					return false;
 				}
 				board.setCollector(col);
 				board.createMosquitos(config.getNumMosquitos());
@@ -238,8 +281,10 @@ import org.apache.log4j.PropertyConfigurator;
 			log.error("Exception: " + e);
 			return false;
 		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		round = 0;

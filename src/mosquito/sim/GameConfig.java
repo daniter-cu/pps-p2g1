@@ -19,8 +19,19 @@ import javax.swing.DefaultComboBoxModel;
 
 import org.apache.log4j.Logger;
 
-public class GameConfig {
-
+public class GameConfig implements Cloneable{
+	public Object clone()
+	{
+		GameConfig r = new GameConfig(this.confFileName);
+		r.num_lights = this.num_lights;
+		r.num_mosquitos = this.num_mosquitos;
+		r.number_of_rounds = this.number_of_rounds;
+		r.max_rounds = this.max_rounds;
+		r.selectedBoard = this.selectedBoard;
+		r.playerClass = this.playerClass;
+		r.boardFile =this.boardFile;
+		return r;
+	}
 	static int gameDelay = 100;
 	int number_of_rounds;
 	int current_round;

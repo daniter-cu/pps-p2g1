@@ -240,6 +240,7 @@ public final class BoardPanel extends JPanel implements MouseListener,
 					(int) Board.toScreenSpace(Collector.RADIUS),
 					(int) Board.toScreenSpace(Collector.RADIUS));
 		}
+		
 		if (board != null)
 			for (Line2D line : board.walls) {
 				Line2D trans = new Line2D.Double(Board.toScreenSpace(line
@@ -249,12 +250,14 @@ public final class BoardPanel extends JPanel implements MouseListener,
 					g2D.setStroke(new BasicStroke(3));
 					g2D.setColor(Color.cyan);
 					g2D.draw(trans);
-					g2D.setStroke(new BasicStroke(1));
-					g2D.setColor(Color.red);
+					
+					
 				}
-				g2D.setColor(Color.red);
+				g2D.setStroke(new BasicStroke(2));
+				g2D.setColor(new Color(229,52,70));
 				g2D.draw(trans);
 			}
+		g2D.setStroke(new BasicStroke(1));
 		if (board != null && board.getMosquitos() != null)
 			for (Mosquito m : board.getMosquitos()) {
 				if (!m.caught) {

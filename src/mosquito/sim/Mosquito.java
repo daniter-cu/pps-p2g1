@@ -13,14 +13,14 @@ public class Mosquito {
 		this.location = p;
 		this.caught=  false;
 	}
-	public void moveInDirection(int d, HashSet<Line2D> walls) {
+	public void moveInDirection(double d, HashSet<Line2D> walls) {
 		d = d -30 + GameConfig.random.nextInt(60);
 		if(location.getY() - Math.sin(d*Math.PI/180) < 0 || location.getY() - Math.sin(d*Math.PI/180) > 100 || location.getX() + Math.cos(d*Math.PI/180) > 100 || location.getX() + Math.cos(d*Math.PI/180) < 0)
 			return;
-		Rectangle2D target = new Rectangle2D.Double(location.getX() + Math.cos(d*Math.PI/180) - Board.MOSQUITO_EPSILON, location.getY() - Math.sin(d*Math.PI/180) - Board.MOSQUITO_EPSILON, Board.MOSQUITO_EPSILON*2, Board.MOSQUITO_EPSILON*2);
+		Line2D.Double pathLine = new Line2D.Double(location.getX(),location.getY(),location.getX() + Math.cos(d*Math.PI/180), location.getY() - Math.sin(d*Math.PI/180));
 		for(Line2D l : walls)
 		{
-			if(l.intersects(target))
+			if(l.intersectsLine(pathLine))
 				return;
 		}
 		location.setLocation(location.getX() + Math.cos(d*Math.PI/180), location.getY() - Math.sin(d*Math.PI/180));
