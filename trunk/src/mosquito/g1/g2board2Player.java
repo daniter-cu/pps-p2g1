@@ -57,7 +57,7 @@ public class g2board2Player extends Player {
 
 	@Override
 	public Collector getCollector() {
-		Collector c = new Collector(50,51);
+		Collector c = new Collector(45,80);
 		return c;
 	}
 
