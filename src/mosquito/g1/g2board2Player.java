@@ -76,7 +76,7 @@ public class g2board2Player extends Player {
 		if(numLights == 3)
 			c = new Collector(62.5,63);
 		else
-			c = new Collector(45,80);
+			c = new Collector(44.5,80);
 
 		return c;
 	}
