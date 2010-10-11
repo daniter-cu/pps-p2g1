@@ -7,6 +7,6 @@
 package mosquito.sim;
 
 public interface GameListener {
-	public enum GameUpdateType{STARTING, GAMEOVER, MOVEPROCESSED, MOUSEMOVED};
+	public enum GameUpdateType{STARTING, GAMEOVER, MOVEPROCESSED, MOUSEMOVED, REPAINT};
 	public void gameUpdated(GameUpdateType type);
 }

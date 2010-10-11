@@ -12,7 +12,6 @@ import mosquito.sim.Player;
 
 public class DumbPlayer0 extends Player {
 	private int numLights;
-	Point2D lastLight = null;
 	
 	@Override
 	public String getName() {
@@ -24,7 +23,7 @@ public class DumbPlayer0 extends Player {
 		this.numLights = NumLights;
 	}
 
-	
+	Point2D lastLight = null;
 	@Override
 	public Set<Light> getLights() {
 		HashSet<Light> ret = new HashSet<Light>();

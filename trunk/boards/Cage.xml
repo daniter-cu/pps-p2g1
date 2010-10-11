@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BOARD><DIMENSIONS height="100" width="100"></DIMENSIONS><WALLS><WALL x_1="8.48" x_2="91.04" y_1="66.08" y_2="66.08"></WALL><WALL x_1="8.16" x_2="91.52" y_1="24.16" y_2="24.16"></WALL><WALL x_1="8.8" x_2="91.2" y_1="38.72" y_2="38.72"></WALL><WALL x_1="8.64" x_2="91.52" y_1="50.56" y_2="50.56"></WALL><WALL x_1="8.64" x_2="90.88" y_1="10.08" y_2="10.08"></WALL><WALL x_1="8.32" x_2="90.08" y_1="91.04" y_2="91.04"></WALL><WALL x_1="8.48" x_2="90.24" y_1="78.24" y_2="78.24"></WALL></WALLS></BOARD>

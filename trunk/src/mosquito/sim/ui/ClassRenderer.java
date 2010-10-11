@@ -20,6 +20,7 @@ public class ClassRenderer extends DefaultListCellRenderer
 				Class<Player> p = (Class<Player>) value;
 				Player pl = ((Player) p.newInstance());
 				String strPlayer = pl.getName();
+				strPlayer = pl.getClass().getPackage().getName().replace("mosquito.", "") + " "+ strPlayer;
 				if (strPlayer != null)
 				{
 					setText(strPlayer);

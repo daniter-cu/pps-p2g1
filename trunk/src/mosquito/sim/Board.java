@@ -50,6 +50,7 @@ public final class Board {
 	public static int pixels_per_pixel = 25;
 	private int width;
 	private int height;
+	public boolean impersonated = false;
 	HashSet<Mosquito> mosquitos = new HashSet<Mosquito>();
 	public GameEngine engine;
 	private HashMap<Double, HashMap<Double, Double>> cache; // this should be
@@ -67,9 +68,15 @@ public final class Board {
 		return Math.round(100 * n) / 100;
 	}
 
-	public double lightStrengthAt(Point2D p) {
+	public double lightStrengthAt(Point2D p, Point2D p2) {
 		if (p.getX() < 0 || p.getY() < 0 || p.getX() > 99 || p.getY() > 99)
 			return 0;
+		Line2D between1 = new Line2D.Double(p, p2);
+		for (Line2D w : walls) {
+			if (between1.intersectsLine(w))
+					return -1;
+		}
+		
 		double strongest = 21;
 		// First check for cache hit
 		double i = round(p.getX());
@@ -85,24 +92,18 @@ public final class Board {
 				if (l.isOn(engine.getCurrentRound())
 						&& l.getLocation().distance(p) <= 20) {
 					Line2D between = new Line2D.Double(p.getX()
-							+ MOSQUITO_EPSILON, p.getY() + MOSQUITO_EPSILON, l
-							.getLocation().getX() + MOSQUITO_EPSILON, l
-							.getLocation().getY() + MOSQUITO_EPSILON);
-					Line2D between2 = new Line2D.Double(p.getX()
-							- MOSQUITO_EPSILON, p.getY() - MOSQUITO_EPSILON, l
-							.getLocation().getX() - MOSQUITO_EPSILON, l
-							.getLocation().getY() - MOSQUITO_EPSILON);
-					Rectangle2D target = new Rectangle2D.Double(p.getX()
-							- MOSQUITO_EPSILON, p.getY() - MOSQUITO_EPSILON,
-							MOSQUITO_EPSILON * 2, MOSQUITO_EPSILON * 2);
+							, p.getY(), l
+							.getLocation().getX() , l
+							.getLocation().getY());					
 					for (Line2D w : walls) {
 						if (between.intersectsLine(w)
-								|| between2.intersectsLine(w)
-								|| target.intersectsLine(w)) {
+//								|| between2.intersectsLine(w)
+								) {
 							obscured = true;
 						}
 					}
 					if (!obscured && l.getLocation().distance(p) < strongest) {
+						BoardPanel.debugLine = between;
 						strongest = l.getLocation().distance(p);
 					}
 				}
@@ -117,8 +118,8 @@ public final class Board {
 		return 20 - strongest;
 	}
 
-	public double lightStrengthAt(double i, double j) {
-		return lightStrengthAt(new Point2D.Double(i, j));
+	public double lightStrengthAt(double i, double j, Point2D p2) {
+		return lightStrengthAt(new Point2D.Double(i, j),p2);
 	}
 
 	public void setCollector(Collector collector) {
@@ -168,56 +169,101 @@ public final class Board {
 	public int cacheHits = 0;
 	public int cacheMisses = 0;
 
-	public int getDirectionOfLight(Point2D p) {
-		if (lightsChanged())
-			clearCache();
-		int angle = -1;
-		double brightest = 0;
-		// It's possible that there's a route to the light, we should check!
-		for (double a = 0; a < Math.PI / 2; a += Math.PI / 120) {
-			double r = 1;
-			double cos = Math.cos(a);
-			double sin = Math.sin(a);
-			// cutoff for rounding issues
-			if (cos < 0.00000000001)
-				cos = 0;
-			if (sin < 0.00000000001)
-				sin = 0;
-			if (cos != 0 && sin != 0) {
-
-				double i = (double) (p.getX() + (r * cos));
-				double j = (double) (p.getY() - (r * sin));
-				double sample = lightStrengthAt(i, j);
-				if (sample > brightest) {
-					angle = (int) (a * 180 / Math.PI);
-					brightest = sample;
-				}
-
-				i = (p.getX() - (r * cos));
-				j = (p.getY() - (r * sin));
-				sample = lightStrengthAt(i, j);
-				if (sample > brightest) {
-					angle = 180 - (int) (a * 180 / Math.PI);
-					brightest = sample;
-				}
-
-				// 180+theta
-				i = (p.getX() - (r * cos));
-				j = (p.getY() + (r * sin));
-				sample = lightStrengthAt(i, j);
-				if (sample > brightest) {
-					angle = 180 + (int) (a * 180 / Math.PI);
-					brightest = sample;
-				}
-
-				// 360-theta
-				i = (p.getX() + (r * cos));
-				j = (p.getY() + (r * sin));
-				sample = lightStrengthAt(i, j);
-				if (sample > brightest) {
-					angle = 360 - (int) (a * 180 / Math.PI);
-					brightest = sample;
-				}
+	public double getDirectionOfLight(Point2D p) {
+//		if (lightsChanged())
+//			clearCache();
+//		int angle = -1;
+//		double brightest = 0;
+//		// It's possible that there's a route to the light, we should check!
+//		for (double a = 0; a < Math.PI / 2; a += Math.PI / 120) {
+//			double r = 1;
+//			double cos = Math.cos(a);
+//			double sin = Math.sin(a);
+//			// cutoff for rounding issues
+//			if (cos < 0.00000000001)
+//				cos = 0;
+//			if (sin < 0.00000000001)
+//				sin = 0;
+//			if (cos != 0 && sin != 0) {
+//
+//				double i = (double) (p.getX() + (r * cos));
+//				double j = (double) (p.getY() - (r * sin));
+//				double sample = lightStrengthAt(i, j,p);
+//				if (sample > brightest) {
+//					angle = (int) (a * 180 / Math.PI);
+//					brightest = sample;
+//				}
+//
+//				i = (p.getX() - (r * cos));
+//				j = (p.getY() - (r * sin));
+//				sample = lightStrengthAt(i, j,p);
+//				if (sample > brightest) {
+//					angle = 180 - (int) (a * 180 / Math.PI);
+//					brightest = sample;
+//				}
+//
+//				// 180+theta
+//				i = (p.getX() - (r * cos));
+//				j = (p.getY() + (r * sin));
+//				sample = lightStrengthAt(i, j,p);
+//				if (sample > brightest) {
+//					angle = 180 + (int) (a * 180 / Math.PI);
+//					brightest = sample;
+//				}
+//
+//				// 360-theta
+//				i = (p.getX() + (r * cos));
+//				j = (p.getY() + (r * sin));
+//				sample = lightStrengthAt(i, j,p);
+//				if (sample > brightest) {
+//					angle = 360 - (int) (a * 180 / Math.PI);
+//					brightest = sample;
+//				}
+//			}
+//		}
+		double angle = -1;
+		double max_dist = 21;
+		for(Light l : lights)
+		{
+			if(l.getLocation().distance(p) < max_dist && l.isOn(engine.getCurrentRound()))
+			{
+				//See if we have a straight path to the light
+				boolean obscured = false;
+					Line2D between = new Line2D.Double(p.getX()
+							, p.getY(), l
+							.getLocation().getX() , l
+							.getLocation().getY());					
+					for (Line2D w : walls) {
+						if (between.intersectsLine(w)
+//								|| between2.intersectsLine(w)
+								) {
+							obscured = true;
+						}
+					}
+					if (!obscured) {
+//						BoardPanel.debugLine = between;
+						max_dist = l.getLocation().distance(p);
+						angle = Math.atan(Math.abs((l.getLocation().getY() - p.getY())/(l.getLocation().getX() - p.getX()))) * 180/Math.PI;
+						
+						
+						if(l.getLocation().getX() > p.getX() && l.getLocation().getY() < p.getY())
+						{
+							angle = angle;
+						}
+						else if(l.getLocation().getX() < p.getX() && l.getLocation().getY() > p.getY())
+						{
+							angle = 180 + angle;
+						}
+						else if(l.getLocation().getX() < p.getX() && l.getLocation().getY() < p.getY())
+						{
+							angle = 180 - angle;
+						}
+						else if(l.getLocation().getX() > p.getX() && l.getLocation().getY() > p.getY())
+						{
+							angle = 360 - angle;
+						}
+				
+					}
 			}
 		}
 		if (angle > 0)
