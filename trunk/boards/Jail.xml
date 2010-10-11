@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Jail.xml -->
+<!-- Light Par: around 6 -->
+<!-- Reason it's interesting / challenging: Since the rooms at the four corner act as partitioned
+chambers in which mosquitos can become trapped, the player must realize that it will have to draw the
+mosquitoes out from those places. Also, since the chambers are partitioned from each other, the player
+should realize that and draw the mosquitoes out from each chamber separately.-->
+<BOARD><DIMENSIONS height="100" width="100"></DIMENSIONS><WALLS><WALL x_1="9.6" x_2="91.36" y_1="29.28" y_2="29.28"></WALL><WALL x_1="9.44" x_2="90.56" y_1="65.6" y_2="65.6"></WALL><WALL x_1="49.92" x_2="49.92" y_1="64.96" y_2="99.84"></WALL><WALL x_1="50.72" x_2="50.72" y_1="30.24" y_2="0.0"></WALL></WALLS></BOARD>
