@@ -54,7 +54,16 @@ public class g2board2Player extends Player {
 		}
 		if(numLights == 10)
 		{
-			
+		    ret.add(new Light(44, 80, 1, 1, 0));
+		    ret.add(new Light(57,68, 55, 25, 0));
+		    ret.add(new Light(70,58, 55, 25, 30));
+		    ret.add(new Light(82,45, 55, 25, 60));
+		    ret.add(new Light(29,90, 55, 25, 0));
+		    ret.add(new Light(12,92, 55, 25, 30));
+		    ret.add(new Light(3,83, 55, 25, 60));
+		    ret.add(new Light(12,68, 55, 25, 35));
+		    ret.add(new Light(22,54, 55, 25, 65));
+		    ret.add(new Light(40,52, 55, 25, 40));
 		}
 		return ret;
 	}
@@ -66,10 +75,8 @@ public class g2board2Player extends Player {
 		Collector c;
 		if(numLights == 3)
 			c = new Collector(62.5,63);
-		else if(numLights == 10)
-			c = new Collector(50,51);
 		else
-			c = new Collector(50,51);
+			c = new Collector(45,80);
 
 		return c;
 	}
