@@ -44,6 +44,12 @@ public class g2board2Player extends Player {
 		HashSet<Light> ret = new HashSet<Light>();
 		if(numLights == 3)
 		{
+			Light l1 = new Light(76,50,80,20,0);
+			Light l2 = new Light(63,63,40,20,20);
+			Light l3 = new Light(50,77,80,20,40);
+			ret.add(l1);
+			ret.add(l2);
+			ret.add(l3);
 			
 		}
 		if(numLights == 10)
@@ -57,7 +63,14 @@ public class g2board2Player extends Player {
 
 	@Override
 	public Collector getCollector() {
-		Collector c = new Collector(45,80);
+		Collector c;
+		if(numLights == 3)
+			c = new Collector(65,61);
+		else if(numLights == 10)
+			c = new Collector(50,51);
+		else
+			c = new Collector(50,51);
+
 		return c;
 	}
 
