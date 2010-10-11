@@ -15,10 +15,10 @@ import mosquito.sim.Player;
 public class WalkTowardsTheLight extends Player {
 	private Set<Line2D> walls;
 	private int numLights;
-	private int INTERVAL = 60;
+	private int INTERVAL = 40;
 	private int OFFSET = 9;
-	private int ON_TIME = 25;
-	private int OUTER_ON_TIME = 17;
+	private int ON_TIME = 20;
+	private int OUTER_ON_TIME = 10;
 	private int SEC_ON_TIME = 15;
 	private int BASE = 50;
 	private int X_DISPLACE = 22;
@@ -42,73 +42,75 @@ public class WalkTowardsTheLight extends Player {
 	public Set<Light> getLights() {
 		testPositions();
 		HashSet<Light> ret = new HashSet<Light>();
-		lastLight = new Point2D.Double(47, 50);
-		Light l = new Light(BASE - OFFSET,BASE, INTERVAL,ON_TIME,0);
-		Light l2 = new Light(BASE + OFFSET,BASE, INTERVAL,ON_TIME,ON_TIME);
-		Light l3 = new Light(BASE - X_DISPLACE,BASE - Y_DISPLACE,INTERVAL,SEC_ON_TIME,ON_TIME+5);
-		Light l4 = new Light(BASE + X_DISPLACE,BASE + Y_DISPLACE,INTERVAL,SEC_ON_TIME,5);
-		Light l5 = new Light(BASE + X_DISPLACE,BASE - Y_DISPLACE,INTERVAL,SEC_ON_TIME,5);
-		Light l6 = new Light(BASE - X_DISPLACE,BASE + Y_DISPLACE,INTERVAL,SEC_ON_TIME,ON_TIME+5);
 		
-		if(numLights == 1)
-		{
-			ret.add(new Light(50,49,10,5,1));
-		}
-		else if(numLights == 2)
-		{
-//			ret.add(l);
-//			ret.add(l2);
-			ret.add(new Light(50, 50, 1, 1, 0));
-			ret.add(new Light(BASE - 15,BASE - 10,27,15,0));
-		}
-		else if(numLights == 3)
-		{
-//			ret.add(l);
-//			ret.add(l2);
-//			ret.add(l3);
-			ret.add(new Light(50, 50, 1, 1, 0));
-			ret.add(new Light(BASE - 15,BASE - 10,27,15,0));
-			ret.add(new Light(BASE + 15,BASE + 10,27,15,0));
-		}
-		if(numLights == 4)
-		{
-			ret.add(l);
+		Light l1 = new Light(BASE-0.5,BASE,1,1,0);
+		
+		Light l2 = new Light(BASE + DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,9);
+		Light l3 = new Light(BASE - DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,9);
+		Light l4 = new Light(BASE - DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,9);
+		Light l5 = new Light(BASE + DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,9);
+		
+		Light l6 = new Light(BASE + DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		Light l7 = new Light(BASE - DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		Light l8 = new Light(BASE - DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		Light l9 = new Light(BASE + DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		
+		Light l10 = new Light(BASE + 2*DISPLACEMENT,BASE + 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
+		Light l11 = new Light(BASE - 2*DISPLACEMENT,BASE - 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
+		Light l12 = new Light(BASE - 2*DISPLACEMENT,BASE + 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
+		Light l13 = new Light(BASE + 2*DISPLACEMENT,BASE - 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
+		
+		Light l14 = new Light(BASE-0.5, BASE, 2, 1, 0);
+		Light l15 = new Light(BASE+0.5, BASE, 2, 1, 1);
+		
+		if(numLights < 8)
+			ret.add(l1);
+		
+		if(numLights > 1 && numLights < 6)
 			ret.add(l2);
+			
+		if(numLights > 2 && numLights < 7)
 			ret.add(l3);
+			
+		if(numLights > 3 && numLights < 9)
 			ret.add(l4);
-		}
-		else if(numLights == 5)
-		{
-			ret.add(l);
-			ret.add(l2);
-			ret.add(l3);
-			ret.add(l4);
+		
+		if(numLights > 4 && numLights < 10)
 			ret.add(l5);
-		}
-		else if(numLights == 6)
+		
+		if(numLights > 5)
 		{
-			ret.add(l);
-			ret.add(l2);
-			ret.add(l3);
-			ret.add(l4);
-			ret.add(l5);
 			ret.add(l6);
+			ret.add(l10);
 		}
-		else if(numLights == 10)
+		
+		if(numLights > 6)
 		{
-			ret.add(new Light(50, 50, 1, 1, 0));
-			ret.add(new Light(BASE - DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1));
-			ret.add(new Light(BASE + DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1));
-			ret.add(new Light(BASE - DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1));
-			ret.add(new Light(BASE + DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1));
-			ret.add(new Light(BASE - 2*DISPLACEMENT,BASE - 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0));
-			ret.add(new Light(BASE + 2*DISPLACEMENT,BASE + 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0));
-			ret.add(new Light(BASE - 2*DISPLACEMENT,BASE + 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0));
-			ret.add(new Light(BASE + 2*DISPLACEMENT,BASE - 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0));
-			ret.add(new Light(0,0,0,0,1));
+			ret.add(l7);
+			ret.add(l11);
 		}
-		//for(int i=5; i<numLights; i++)
-		//	ret.add(new Light(0,0,0,0,1));
+		
+		if(numLights > 7)
+		{
+			ret.add(l14);
+			ret.add(l15);
+		}
+		
+		if(numLights > 8)
+		{
+			ret.add(l8);
+			ret.add(l12);
+		}
+		
+		if(numLights > 9)
+		{
+			ret.add(l9);
+			ret.add(l13);
+		}
+		
+		for(int i=10; i<numLights; i++)
+			ret.add(new Light(0,0,0,0,0));
+		
 		return ret;
 	}
 
@@ -134,7 +136,7 @@ public class WalkTowardsTheLight extends Player {
 
 	@Override
 	public Collector getCollector() {
-		Collector c = new Collector(50,51);
+		Collector c = new Collector(BASE,BASE);
 		return c;
 	}
 
