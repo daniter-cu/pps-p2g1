@@ -39,14 +39,14 @@ public class LightConfiguration {
     }
     
     /**
-     * @return
+     * @return The paths that will be traveled by mosquitoes to the center light.
      */
     protected Set<Line2D> connectLights() {
         return null;
     }
     
     /**
-     * @return Whether all of the lights can pulse to the center light successfully
+     * @return Whether all of the lights can pulse to the center light successfully taking into account the shiftAmount.
      */
     public boolean isConfigurationConnected() {
         return true;
