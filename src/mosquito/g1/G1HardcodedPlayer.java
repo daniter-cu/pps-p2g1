@@ -12,7 +12,7 @@ import mosquito.sim.Collector;
 import mosquito.sim.Light;
 import mosquito.sim.Player;
 
-public class g2board2Player extends Player {
+public class G1HardcodedPlayer extends Player {
 
 	private Set<Line2D> walls;
 	private int numLights;
