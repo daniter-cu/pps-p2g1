@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import mosquito.g1.geometries.SpaceFinder;
 import mosquito.sim.Collector;
 import mosquito.sim.Light;
 import mosquito.sim.Player;
@@ -15,10 +16,11 @@ public class WalkTowardsTheLight extends Player {
 	private int numLights;
 	private int INTERVAL = 40;
 	private int ON_TIME = 20;
+	private double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
 	private int OUTER_ON_TIME = 10;
-	private double BASE = 63;
-	//private double DISPLACEMENT = 9;
-	private double DISPLACEMENT = 14;
+	//private double BASE = 50;
+	private double baseX = 50;
+	private double baseY = 50;
 	private boolean [][] openGridSpots = new boolean[100][100];
 	
 	@Override
@@ -35,55 +37,74 @@ public class WalkTowardsTheLight extends Player {
 	Point2D lastLight = null;
 	@Override
 	public Set<Light> getLights() {
-		testPositions();
+		//if empty board, return optimal configuration
+		if(walls.size() == 0)
+			return getCentralShape(DISPLACEMENTS[numLights - 1], 2);
+		
+		//find largest circle and extract coordinates
+		SpaceFinder finder = new SpaceFinder(walls);
+		double radius = finder.getRadius();
+		//System.err.println(radius);
+		baseX = finder.getCenter().getX();
+		baseY = finder.getCenter().getY();
+		//System.err.println(baseX + ", " + baseY);
+		
+		//calculate proper displacement
+		double offset = 1;
+		int levels = 1;
+		offset = Math.sqrt( Math.pow(radius, 2) / 2 );
+		if(numLights > 7)
+		{
+			offset /= 2;
+			levels = 2;
+		}
+		
+		//System.err.println(offset);
+		
+		//find relative best spot given configuration
+		return getCentralShape(Math.min(offset, 14), levels);
+	}
+	
+	//returns the set of lights representing the largest center shape that can fit on the board
+	private HashSet<Light> getCentralShape(double displacement, int levels)
+	{
 		HashSet<Light> ret = new HashSet<Light>();
 		
-		Light l1 = new Light(BASE,BASE,1,1,0);
+		Light l1 = new Light(baseX,baseY,1,1,0);
 		
-		Light l2 = new Light(BASE - DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,9);
-		Light l3 = new Light(BASE + DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,9);
-		Light l4 = new Light(BASE + DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,9);
-		Light l5 = new Light(BASE - DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,9);
+		Light l2 = new Light(baseX - displacement,baseY + displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		Light l3 = new Light(baseX + displacement,baseY - displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		Light l4 = new Light(baseX + displacement,baseY + displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		Light l5 = new Light(baseX - displacement,baseY - displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
 		
-		Light l6 = new Light(BASE - DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
-		Light l7 = new Light(BASE + DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
-		Light l8 = new Light(BASE + DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
-		Light l9 = new Light(BASE - DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		Light l10 = new Light(baseX - levels*displacement,baseY + levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
+		Light l11 = new Light(baseX + levels*displacement,baseY - levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
+		Light l12 = new Light(baseX + levels*displacement,baseY + levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
+		Light l13 = new Light(baseX - levels*displacement,baseY - levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
 		
-		Light l10 = new Light(BASE - 2*DISPLACEMENT,BASE + 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
-		Light l11 = new Light(BASE + 2*DISPLACEMENT,BASE - 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
-		Light l12 = new Light(BASE + 2*DISPLACEMENT,BASE + 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
-		Light l13 = new Light(BASE - 2*DISPLACEMENT,BASE - 2*DISPLACEMENT,INTERVAL,OUTER_ON_TIME,0);
-		
-		Light l14 = new Light(BASE-0.5, BASE, 2, 1, 0);
-		Light l15 = new Light(BASE+0.5, BASE, 2, 1, 1);
+		Light l14 = new Light(baseX-0.5, baseY, 2, 1, 0);
+		Light l15 = new Light(baseX+0.5, baseY, 2, 1, 1);
 		
 		if(numLights < 8)
 			ret.add(l1);
 		
-		if(numLights > 1 && numLights < 6)
+		if(numLights > 1)
 			ret.add(l2);
 			
-		if(numLights > 2 && numLights < 7)
+		if(numLights > 2)
 			ret.add(l3);
 			
-		if(numLights > 3 && numLights < 9)
+		if(numLights > 3)
 			ret.add(l4);
 		
-		if(numLights > 4 && numLights < 10)
+		if(numLights > 4)
 			ret.add(l5);
 		
 		if(numLights > 5)
-		{
-			ret.add(l6);
 			ret.add(l10);
-		}
 		
 		if(numLights > 6)
-		{
-			ret.add(l7);
 			ret.add(l11);
-		}
 		
 		if(numLights > 7)
 		{
@@ -92,18 +113,14 @@ public class WalkTowardsTheLight extends Player {
 		}
 		
 		if(numLights > 8)
-		{
-			ret.add(l8);
 			ret.add(l12);
-		}
 		
 		if(numLights > 9)
-		{
-			ret.add(l9);
 			ret.add(l13);
-		}
 		
-		for(int i=10; i<numLights; i++)
+		
+		
+		for(int i=ret.size(); i<numLights; i++)
 			ret.add(new Light(0,0,0,0,0));
 		
 		return ret;
@@ -133,9 +150,9 @@ public class WalkTowardsTheLight extends Player {
 	public Collector getCollector() {
 		Collector c;
 		if(numLights < 8)
-			c = new Collector(BASE-0.5,BASE);
+			c = new Collector(baseX-0.5,baseY);
 		else
-			c = new Collector(BASE, BASE);
+			c = new Collector(baseX, baseY);
 		return c;
 	}
 
