@@ -6,14 +6,16 @@ import java.util.ArrayList;
 import java.util.*;
 
 public class LightConfiguration {
-    private List<Point2D> lightSet;
+    public static int CONNECTION_RADIUS = 25;
+    
+    private List<Light2D> lightSet;
     private int centerLightIndex;
     private WallConfiguration board;
     private Point2D shiftAmount;
     
     public LightConfiguration() {
         centerLightIndex = -1;
-        lightSet = new ArrayList<Point2D>();
+        lightSet = new ArrayList<Light2D>();
     }
     
     public void addCenterLight(Point2D center) {
@@ -22,7 +24,7 @@ public class LightConfiguration {
     }
     
     public void addLight(Point2D center) {
-        lightSet.add(center);
+        lightSet.add(new Light2D(center));
     }
     
     public void addWalls(Set<Line2D> board) {
@@ -43,36 +45,36 @@ public class LightConfiguration {
     public Set<Line2D> connectLights() 
     {
     	Set<Line2D> lines = new HashSet<Line2D>();
-    	ArrayList<Point2D> unused = new ArrayList<Point2D>(lightSet);
-    	Point2D center = lightSet.get(centerLightIndex);
+    	ArrayList<Light2D> unused = new ArrayList<Light2D>(lightSet);
+    	Light2D center = lightSet.get(centerLightIndex);
     	//remove center light
-    	for(Point2D p : unused)
+    	for(Light2D p : unused)
     	{
     		if(p.equals(center));
     			unused.remove(p);
     	}
     	
     	//find all lines connected to center light
-    	for(Point2D p : unused)
+    	for(Light2D p : unused)
     	{
-    		if(p.distance(center) <= 25)
+    		if(p.distance(center) <= CONNECTION_RADIUS)
     		{
-    			lines.add(new Line2D.Double(p,center));
+    			lines.add(new Line2D.Double(p.getCenter(), center.getCenter()));
     			unused.remove(p);
     		}
     	}
     	
     	while(!unused.isEmpty())
     	{
-    		Point2D temp = unused.get(0);
+    		Light2D temp = unused.get(0);
     		unused.remove(temp);
-    		for(Point2D p : lightSet)
+    		for(Light2D p : lightSet)
         	{
     			if(p.equals(temp))
     				continue;
         		if(p.distance(temp) <= 25)
         		{
-        			lines.add(new Line2D.Double(p,temp));
+        			lines.add(new Line2D.Double(p.getCenter(), temp.getCenter()));
         		}
         	}	
     	}
@@ -87,8 +89,23 @@ public class LightConfiguration {
         return true;
     }
     
-    //TODO: Zack, make this.
     public double areaCovered() {
         return 0.;
+    }
+    
+    private class Light2D {
+        Point2D center;
+        
+        public Light2D(Point2D center) {
+            this.center = center;
+        }
+        
+        public Point2D getCenter() {
+            return center;
+        }
+        
+        public double distance(Light2D other) {
+            return this.getCenter().distance(other.getCenter());
+        }
     }
 }
