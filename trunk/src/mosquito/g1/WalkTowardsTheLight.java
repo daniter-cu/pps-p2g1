@@ -2,8 +2,6 @@ package mosquito.g1;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -16,14 +14,11 @@ public class WalkTowardsTheLight extends Player {
 	private Set<Line2D> walls;
 	private int numLights;
 	private int INTERVAL = 40;
-	private int OFFSET = 9;
 	private int ON_TIME = 20;
 	private int OUTER_ON_TIME = 10;
-	private int SEC_ON_TIME = 15;
-	private int BASE = 50;
-	private int X_DISPLACE = 22;
-	private int Y_DISPLACE = 13;
-	private int DISPLACEMENT = 13;
+	private double BASE = 63;
+	//private double DISPLACEMENT = 9;
+	private double DISPLACEMENT = 14;
 	private boolean [][] openGridSpots = new boolean[100][100];
 	
 	@Override
@@ -43,7 +38,7 @@ public class WalkTowardsTheLight extends Player {
 		testPositions();
 		HashSet<Light> ret = new HashSet<Light>();
 		
-		Light l1 = new Light(BASE-0.5,BASE,1,1,0);
+		Light l1 = new Light(BASE,BASE,1,1,0);
 		
 		Light l2 = new Light(BASE - DISPLACEMENT,BASE + DISPLACEMENT,INTERVAL,ON_TIME,9);
 		Light l3 = new Light(BASE + DISPLACEMENT,BASE - DISPLACEMENT,INTERVAL,ON_TIME,9);
@@ -136,7 +131,11 @@ public class WalkTowardsTheLight extends Player {
 
 	@Override
 	public Collector getCollector() {
-		Collector c = new Collector(BASE,BASE);
+		Collector c;
+		if(numLights < 8)
+			c = new Collector(BASE-0.5,BASE);
+		else
+			c = new Collector(BASE, BASE);
 		return c;
 	}
 
