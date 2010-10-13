@@ -2,13 +2,15 @@ package mosquito.g1.geometries;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.*;
 
 public class LightConfiguration {
+    public static int LIGHT_RADIUS = 20;
+    public static double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
+    
     private List<Point2D> lightSet;
     private int centerLightIndex;
-    private WallConfiguration board;
+    private Set<Line2D> board;
     private Point2D shiftAmount;
     
     public LightConfiguration() {
@@ -26,7 +28,7 @@ public class LightConfiguration {
     }
     
     public void addWalls(Set<Line2D> board) {
-        this.board = new WallConfiguration(board);
+        this.board = board;
     }
     
     /**
@@ -84,10 +86,119 @@ public class LightConfiguration {
      * @return Whether all of the lights can pulse to the center light successfully taking into account the shiftAmount.
      */
     public boolean isConfigurationConnected() {
+        Set<Line2D> network = connectLights();
+        
+        for(Line2D link : network) {
+            for(Line2D wall : board) {
+                if(wall.intersectsLine(shift(link))) {
+                    return false;
+                }
+            }
+        }
+        
         return true;
     }
     
+    /**
+     * @return The total area illuminated by this configuration with the current shift amount.
+     */
     public double areaCovered() {
-        return 0.;
+        return calculateAreaCovered(0, new HashSet<Point2D>(), 0.);
+    }
+    
+    private double calculateAreaCovered(int position, Set<Point2D> lightsCovered, double areaSoFar) {
+        areaSoFar += areaForLight(position, lightsCovered);
+        lightsCovered.add(lightSet.get(position));
+        return calculateAreaCovered(position + 1, lightsCovered, areaSoFar);
+    }
+    
+    // TODO:finish this method
+    private double areaForLight(int index, Set<Point2D> lightsToIgnore) {
+        double area = BASE_AREA;
+        
+        
+        
+        return area;
+    }
+    
+    /**
+     * @return The set of (unshifted) light centers that overlap with the specified one.
+     */
+    private Set<Point2D> lightsOverlapping(int index) {
+        Point2D target = lightSet.get(index);
+        Set<Point2D> result = new HashSet<Point2D>();
+        
+        for(int i = 0; i < lightSet.size(); i++) {
+            Point2D p = lightSet.get(i);
+            if(i != index && target.distance(p) < (2 * LIGHT_RADIUS)) {
+                result.add(p);
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * @param index The light to check around
+     * @return Which walls overlap that light's area after shifting.
+     */
+    private Set<Line2D> wallsOverlapping(int index) {
+        Point2D target = shift(lightSet.get(index));
+        Set<Line2D> result = new HashSet<Line2D>();
+        
+        for(Line2D l : board) {
+            if(wallShadows(target, l)) {
+                result.add(l);
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * @return Whether the wall might enter the light's perimeter.
+     */
+    private boolean wallShadows(Point2D light, Line2D wall) {
+        return (wall.ptLineDist(light) < LIGHT_RADIUS);
+    }
+    
+    /**
+     * @return A set of intersection points between the wall an the perimeter of the light.
+     */
+    private Set<Point2D> intersectionPoints(Point2D light, Line2D wall) {
+        double m = (wall.getX2() - wall.getX1()) / (wall.getY2() - wall.getY1());
+        double b = wall.getY1() - (m * wall.getX1());
+        double h = light.getX();
+        double k = light.getY();
+        double r = LIGHT_RADIUS;
+        
+        double sqrtVal = -(b*b)-(2*b*h*m)+(2*b*k)-Math.pow(h*m, 2)+2*h*k*m-k*k+Math.pow(r*m, 2)+r*r;
+        Set<Point2D> result = new HashSet<Point2D>();
+        if(sqrtVal > 0) {
+            sqrtVal = Math.sqrt(sqrtVal);
+            for(int i = 1; i < 2; i++) {
+                double x = ((i==2 ? -sqrtVal : sqrtVal) - (b*m+h+k*m)) / (m*m+1);
+                Point2D point = new Point2D.Double(x, (m*x+b));
+                if(wall.contains(point)) {
+                    result.add(point);
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * @return The point shifted the shiftAmount (treated as a vector).
+     */
+    private Point2D shift(Point2D point) {
+        return new Point2D.Double(point.getX() + shiftAmount.getX(),
+                point.getY() + shiftAmount.getY());
+    }
+    
+    /**
+     * @return The line shifted the shiftAmount (treated as a vector).
+     */
+    private Line2D shift(Line2D line) {
+        return new Line2D.Double(shift(line.getP1()), shift(line.getP2()));
     }
 }
