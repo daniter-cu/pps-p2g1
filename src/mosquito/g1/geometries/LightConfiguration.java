@@ -73,7 +73,6 @@ public class LightConfiguration {
         		if(p.distance(temp) <= 25)
         		{
         			lines.add(new Line2D.Double(p,temp));
-        			unused.remove(p);
         		}
         	}	
     	}
