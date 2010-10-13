@@ -2,15 +2,9 @@ package mosquito.g1.geometries;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import mosquito.sim.Collector;
-import mosquito.sim.Light;
-import mosquito.sim.Player;
 
 public class SpaceFinder {
 
