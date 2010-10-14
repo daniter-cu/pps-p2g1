@@ -10,8 +10,7 @@ public class LightConfiguration {
     
     private List<Point2D> lightSet;
     private int centerLightIndex;
-    private Set<Line2D> board;
-    private Point2D shiftAmount;
+    private static Set<Line2D> board;
     
     public LightConfiguration() {
         centerLightIndex = -1;
@@ -28,15 +27,9 @@ public class LightConfiguration {
     }
     
     public void addWalls(Set<Line2D> board) {
-        this.board = board;
-    }
-    
-    /**
-     * Allows you to set how much the configuration should be shifted from (0,0).
-     * Used for creating configurations that will be tested at many places on the board.
-     */
-    public void setShift(double x, double y) {
-        shiftAmount = new Point2D.Double(x, y);
+        if(board == null) {
+            LightConfiguration.board = board;
+        }
     }
     
     /**
@@ -90,7 +83,7 @@ public class LightConfiguration {
         
         for(Line2D link : network) {
             for(Line2D wall : board) {
-                if(wall.intersectsLine(shift(link))) {
+                if(wall.intersectsLine(link)) {
                     return false;
                 }
             }
@@ -143,7 +136,7 @@ public class LightConfiguration {
      * @return Which walls overlap that light's area after shifting.
      */
     private Set<Line2D> wallsOverlapping(int index) {
-        Point2D target = shift(lightSet.get(index));
+        Point2D target = lightSet.get(index);
         Set<Line2D> result = new HashSet<Line2D>();
         
         for(Line2D l : board) {
@@ -185,20 +178,5 @@ public class LightConfiguration {
             }
         }
         return result;
-    }
-    
-    /**
-     * @return The point shifted the shiftAmount (treated as a vector).
-     */
-    private Point2D shift(Point2D point) {
-        return new Point2D.Double(point.getX() + shiftAmount.getX(),
-                point.getY() + shiftAmount.getY());
-    }
-    
-    /**
-     * @return The line shifted the shiftAmount (treated as a vector).
-     */
-    private Line2D shift(Line2D line) {
-        return new Line2D.Double(shift(line.getP1()), shift(line.getP2()));
     }
 }
