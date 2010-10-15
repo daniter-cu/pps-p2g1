@@ -54,16 +54,26 @@ public class G1HardcodedPlayer extends Player {
 		}
 		if(numLights == 10)
 		{
-		    ret.add(new Light(44, 80, 1, 1, 0));
-		    ret.add(new Light(57,68, 55, 25, 0));
-		    ret.add(new Light(70,58, 55, 25, 30));
-		    ret.add(new Light(82,45, 55, 25, 60));
-		    ret.add(new Light(29,90, 55, 25, 0));
-		    ret.add(new Light(12,92, 55, 25, 30));
-		    ret.add(new Light(3,83, 55, 25, 60));
-		    ret.add(new Light(12,68, 55, 25, 35));
-		    ret.add(new Light(22,54, 55, 25, 65));
-		    ret.add(new Light(40,52, 55, 25, 40));
+			int gap = 4;
+			int on = 17;
+			int cycle = (on * 2) + gap;
+			int start1 = 0;
+			int start2 = (start1 + on + gap) % cycle;
+			int start3 = (start2 + on + gap) % cycle;
+			int start4 = (start3 + on + gap) % cycle;
+			int start5 = (start4 + on + gap) % cycle;
+			int start6 = (start5 + on + gap) % cycle;
+		  
+		    ret.add(new Light(82,45, cycle, on, start4));
+		    ret.add(new Light(70,58, cycle, on, start3));
+		    ret.add(new Light(57,68, cycle, on, start2));
+		    ret.add(new Light(44, 80, cycle, on, start1));
+		    ret.add(new Light(29,90, 1, 1, 0));
+		    ret.add(new Light(12,92, cycle, on, start1));
+		    ret.add(new Light(3,83, cycle, on, start2));
+		    ret.add(new Light(12,68, cycle, on, start3));
+		    ret.add(new Light(22,54, cycle, on, start4));
+		    ret.add(new Light(40,52, cycle, on, start5));
 		}
 		return ret;
 	}
