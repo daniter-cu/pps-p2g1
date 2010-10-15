@@ -1,6 +1,7 @@
 package mosquito.g1.geometries;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Set;
@@ -55,24 +56,50 @@ public class OptimizeConfiguration {
 
 	private LightConfiguration findRandomConfiguration(
 			LightConfiguration currentConfig) {
+		
 		LightConfiguration config = new LightConfiguration();
-		//config.addLight(center)
+		Point2D seedLight = currentConfig.getLights().get(0);
+		config.addLight(seedLight);
+		
 		//need to add uniqueness check
+		//need to increment over all current lights
+		//need to calculate area for all points
+		//need to weight areas and choose one at random
+		//need to keep track of pruned points
+		double []xs = new double[36 * numLights];
+		double []ys = new double[36 * numLights];
 		for(int i=0; i<numLights-1; i++)
 		{
-			double []xs = new double[36];
-			double []ys = new double[36];
+			Point2D newestLight = config.getLights().get(i);
+			double centerX = newestLight.getX();
+			double centerY = newestLight.getY();
+			int baseIndex = 36 * i;
 			
-			//xs[0] = currentConfig.
-			//ys[0]
+			xs[baseIndex] = centerX - radius;
+			ys[baseIndex] = centerY;
+			xs[baseIndex+35] = centerX + radius;
+			ys[baseIndex+35] = centerY;
 			double increment = radius / 9.0;
-			for(double j=-9; j<10; j++)
+			for(int j=baseIndex; j<baseIndex + 17; j++)
 			{
-				double x = radius + ( j * increment );
+				double x = radius + ( ((double)j-8.0) * increment );
+				double curY = getY(x, centerX, centerY);
+				
+				xs[(2*j)+1] = x;
+				ys[(2*j)+1] = curY;
+				
+				xs[(2*j)+2] = x;
+				ys[(2*j)+2] = -1.0 * curY;
 			}
 		}
 		
 		return config;
+	}
+	
+	//calculate the positive y value on the circle, given the x
+	private double getY(double x, double centerX, double centerY)
+	{
+		return Math.sqrt(Math.pow(radius, 2) - Math.pow(x - centerX, 2)) + centerY;
 	}
 
 }
