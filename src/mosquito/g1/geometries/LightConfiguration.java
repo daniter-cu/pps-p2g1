@@ -11,6 +11,7 @@ public class LightConfiguration {
     private List<Point2D> lightSet;
     private int centerLightIndex;
     private static Set<Line2D> board;
+    private double areaCovered = -1;
     
     public LightConfiguration() {
         centerLightIndex = -1;
@@ -96,7 +97,9 @@ public class LightConfiguration {
      * @return The total area illuminated by this configuration with the current shift amount.
      */
     public double areaCovered() {
-        return calculateAreaCovered(0, new HashSet<Point2D>(), 0.);
+    	if(areaCovered == -1)
+    		areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.);
+        return areaCovered;
     }
     
     private double calculateAreaCovered(int position, Set<Point2D> lightsCovered, double areaSoFar) {
