@@ -37,6 +37,21 @@ public class WalkTowardsTheLight extends Player {
 	Point2D lastLight = null;
 	@Override
 	public Set<Light> getLights() {
+		HashSet<Light> lights = new HashSet<Light>();
+		if(numLights == 3)
+		{
+			double length = Math.sqrt(Math.pow(20, 2) / 2.0) - 0.5;
+			Light l1 = new Light(baseX,baseY,1,1,0);
+			Light l2 = new Light(baseX - length, baseY - length, 45, 20, 0);
+			Light l3 = new Light(l2.getX() - length, l2.getY() - length, 45, 20, 24);
+			
+			lights.add(l1);
+			lights.add(l2);
+			lights.add(l3);
+			
+			return lights;
+		}
+		
 		//if empty board, return optimal configuration
 		if(walls.size() == 0)
 			return getCentralShape(DISPLACEMENTS[numLights - 1], 2);
