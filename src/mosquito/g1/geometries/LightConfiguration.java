@@ -33,6 +33,11 @@ public class LightConfiguration {
         }
     }
     
+    public List<Point2D> getLights()
+    {
+    	return lightSet;
+    }
+    
     /**
      * @return The paths that will be traveled by mosquitoes to the center light.
      */
