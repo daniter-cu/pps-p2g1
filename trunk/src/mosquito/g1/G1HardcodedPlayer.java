@@ -73,7 +73,7 @@ public class G1HardcodedPlayer extends Player {
 		    ret.add(new Light(3,83, cycle, on, start2));
 		    ret.add(new Light(12,68, cycle, on, start3));
 		    ret.add(new Light(22,54, cycle, on, start4));
-		    ret.add(new Light(40,52, cycle, on, start5));
+		    ret.add(new Light(71.5,80, cycle, on, start3));
 		}
 		return ret;
 	}
@@ -86,7 +86,8 @@ public class G1HardcodedPlayer extends Player {
 		if(numLights == 3)
 			c = new Collector(62.5,63);
 		else
-			c = new Collector(44.5,80);
+			//c = new Collector(44.5,80);
+			c = new Collector(29.5, 90);
 
 		return c;
 	}

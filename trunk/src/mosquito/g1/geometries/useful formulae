@@ -1,0 +1,9 @@
+int gap = 4;
+int on = 17;
+int cycle = (on * 2) + gap;
+int start1 = 0;
+int start2 = (start1 + on + gap) % cycle;
+int start3 = (start2 + on + gap) % cycle;
+int start4 = (start3 + on + gap) % cycle;
+int start5 = (start4 + on + gap) % cycle;
+int start6 = (start5 + on + gap) % cycle;
