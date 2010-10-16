@@ -83,7 +83,6 @@ public class OptimizeConfiguration {
 		{
 			//reset local variables
 			currentLights = config.getLights();
-			maxArea = 0;
 			totalArea = 0;
 			areas = new LinkedList<Double>();
 			
@@ -100,8 +99,6 @@ public class OptimizeConfiguration {
 				else
 				{
 					areas.add(area);
-					if(area > maxArea)
-						maxArea = area;
 					totalArea += area;
 				}
 			}
@@ -116,12 +113,10 @@ public class OptimizeConfiguration {
 			l = new Point2D.Double(x, y);
 			reachable  = config.isReachableFromConfiguration(l);
 			area = LightConfiguration.marginalArea(l, currentLights);
-			if(reachable && area > AREA_THRESHOLD)
+			if(reachable && area > AREA_THRESHOLD && !points.contains(l))
 			{
 				points.add(l);
 				areas.add(area);
-				if(area > maxArea)
-					maxArea = area;
 				totalArea += area;
 			}
 				
@@ -130,45 +125,39 @@ public class OptimizeConfiguration {
 			l = new Point2D.Double(x, y);
 			reachable  = config.isReachableFromConfiguration(l);
 			area = LightConfiguration.marginalArea(l, currentLights);
-			if(reachable && area > AREA_THRESHOLD)
+			if(reachable && area > AREA_THRESHOLD && !points.contains(l))
 			{
 				points.add(l);
 				areas.add(area);
-				if(area > maxArea)
-					maxArea = area;
 				totalArea += area;
 			}
 			
 			//add all central points to potentials
 			double increment = radius / 9.0;
-			for(int j=-8; j<9; j++)
+			for(int j = -8; j <= 8; j++)
 			{
-				x = radius + ( (double)j * increment );
-				y = getY(x, centerX, centerY);
+				x = centerX + ((double)j * increment);
+				y = getY(x, centerX, centerY, false);
 				l = new Point2D.Double(x, y);
 				
-				reachable  = config.isReachableFromConfiguration(l);
+				reachable = config.isReachableFromConfiguration(l);
 				area = LightConfiguration.marginalArea(l, currentLights);
-				if(reachable && area > AREA_THRESHOLD)
+				if(reachable && area > AREA_THRESHOLD && !points.contains(l))
 				{
 					points.add(l);
 					areas.add(area);
-					if(area > maxArea)
-						maxArea = area;
 					totalArea += area;
 				}
 				
-				y = -1.0 * y;
+				y = getY(x, centerX, centerY, true);
 				l = new Point2D.Double(x, y);
 				
 				reachable  = config.isReachableFromConfiguration(l);
 				area = LightConfiguration.marginalArea(l, currentLights);
-				if(reachable && area > AREA_THRESHOLD)
+				if(reachable && area > AREA_THRESHOLD && !points.contains(l))
 				{
 					points.add(l);
 					areas.add(area);
-					if(area > maxArea)
-						maxArea = area;
 					totalArea += area;
 				}
 			}
@@ -198,9 +187,9 @@ public class OptimizeConfiguration {
 	}
 	
 	//calculate the positive y value on the circle, given the x
-	private double getY(double x, double centerX, double centerY)
+	private double getY(double x, double centerX, double centerY, boolean negate)
 	{
-		return Math.sqrt(Math.pow(radius, 2) - Math.pow(x - centerX, 2)) + centerY;
+		return (negate ? -1 : 1) * Math.sqrt(Math.pow(radius, 2) - Math.pow(x - centerX, 2)) + centerY;
 	}
 
 }

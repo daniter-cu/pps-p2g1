@@ -190,7 +190,8 @@ public class LightConfiguration {
             for(int j = i + 1; j < lightSet.size(); j++) {
                 Point2D light1 = lightSet.get(i);
                 Point2D light2 = lightSet.get(j);
-                if(light1.distance(light2) <= LIGHT_RADIUS) {
+                if(light1.distance(light2) <= LIGHT_RADIUS + 1) {
+                    System.out.println("Link found between lights "+i+" and "+j);
                     result.get(i).add(j);
                     result.get(j).add(i);
                 }
