@@ -10,7 +10,9 @@ public class OptimizeConfiguration {
 	private LinkedList<LightConfiguration> randConfigs;
 	private int numLights;
 	private double radius = 20;
-	private final double AREA_THRESHOLD = 100;
+	private final double AREA_THRESHOLD = 50;
+	private final int MAX_ITERATIONS = 50;
+	private final int MAX_CONFIGS = 10;
 
 	public OptimizeConfiguration(LinkedList<Point2D> seedLights, int numLights)
 	{
@@ -30,9 +32,10 @@ public class OptimizeConfiguration {
 		LightConfiguration currentConfig = new LightConfiguration();
 		
 		//create 100,000 configurations
+		int num_iterations = 0;
 		for(Point2D p : seedLights)
 		{
-			for(int j=0; j<100; j++)
+			for(int j=0; j<MAX_CONFIGS; j++)
 			{
 				currentConfig = new LightConfiguration();
 				currentConfig.addLight(p);
@@ -53,6 +56,10 @@ public class OptimizeConfiguration {
 				if(!inserted)
 					it.add(currentConfig);
 			}
+			
+			num_iterations++;
+			if(num_iterations > MAX_ITERATIONS)
+				break;
 		}
 		
 		return randConfigs.getFirst();
@@ -109,8 +116,9 @@ public class OptimizeConfiguration {
 			l = new Point2D.Double(x, y);
 			reachable  = config.isReachableFromConfiguration(l);
 			area = LightConfiguration.marginalArea(l, currentLights);
-			if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
+			if(reachable && area > AREA_THRESHOLD)
 			{
+				points.add(l);
 				areas.add(area);
 				if(area > maxArea)
 					maxArea = area;
@@ -122,8 +130,9 @@ public class OptimizeConfiguration {
 			l = new Point2D.Double(x, y);
 			reachable  = config.isReachableFromConfiguration(l);
 			area = LightConfiguration.marginalArea(l, currentLights);
-			if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
+			if(reachable && area > AREA_THRESHOLD)
 			{
+				points.add(l);
 				areas.add(area);
 				if(area > maxArea)
 					maxArea = area;
@@ -140,8 +149,9 @@ public class OptimizeConfiguration {
 				
 				reachable  = config.isReachableFromConfiguration(l);
 				area = LightConfiguration.marginalArea(l, currentLights);
-				if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
+				if(reachable && area > AREA_THRESHOLD)
 				{
+					points.add(l);
 					areas.add(area);
 					if(area > maxArea)
 						maxArea = area;
@@ -153,8 +163,9 @@ public class OptimizeConfiguration {
 				
 				reachable  = config.isReachableFromConfiguration(l);
 				area = LightConfiguration.marginalArea(l, currentLights);
-				if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
+				if(reachable && area > AREA_THRESHOLD)
 				{
+					points.add(l);
 					areas.add(area);
 					if(area > maxArea)
 						maxArea = area;
