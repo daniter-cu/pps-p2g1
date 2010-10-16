@@ -18,6 +18,7 @@ public class SpaceFinder {
 	private double radius;
 	private Point2D center;
 	private LinkedList<OurLight> seeds; 
+	private static final int gap = 9;
 	
 	public SpaceFinder(Set<Line2D> walls)
 	{
@@ -85,13 +86,13 @@ public class SpaceFinder {
 			if(added)
 			{
 				//prune close ones
-				if(seed.point.distance(l.point) < 5)
+				if(seed.point.distance(l.point) < gap)
 					it.remove();
 			}
 			else
 			{
 				//check if larger one within range, if so break
-				if(seed.point.distance(l.point) < 5 && seed.coverage >= l.coverage)
+				if(seed.point.distance(l.point) < gap && seed.coverage >= l.coverage)
 				{
 					useless = true;
 					break;
