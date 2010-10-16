@@ -62,11 +62,11 @@ public class SpaceFinder {
 			}
 		}
 		Collections.shuffle(seeds);
-		log.debug("THESE ARE THE SEED POINTS:");
+		/*log.debug("THESE ARE THE SEED POINTS:");
 		for(OurLight a : seeds)
 		{
 			log.debug(a);
-		}
+		}*/
 	}
 	
 	private void addNprune(OurLight l)
