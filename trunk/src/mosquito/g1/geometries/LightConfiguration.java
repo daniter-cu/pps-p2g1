@@ -105,6 +105,11 @@ public class LightConfiguration {
             }
         }
         
+        for(int i=0; i<bestDepths.length; i++)
+        {
+        	System.out.println(bestDepths[i]);
+        }
+        
         createLights(bestDepths);
     }
     
@@ -117,35 +122,40 @@ public class LightConfiguration {
 			int start = 0;
 			Point2D cur = lightSet.get(i);
 			
-			switch(depths[i])
+			if(depths[i] == 0)
 			{
-			case 0:
+				l = new Light(cur.getX(), cur.getY(), 1, 1, 0);
 				c = new Collector(cur.getX() - 0.5, cur.getY());
-				start = START1;
-				break;
-			case 1:
-				start = START1;
-				break;
-			case 2:
-				start = START2;
-				break;
-			case 3:
-				start = START3;
-				break;
-			case 4:
-				start = START4;
-				break;
-			case 5:
-				start = START5;
-				break;
-			case 6:
-				start = START5;
-				break;
-			default:
-				start = 5000;
+			}
+			else
+			{
+				switch(depths[i])
+				{
+				case 1:
+					start = START1;
+					break;
+				case 2:
+					start = START2;
+					break;
+				case 3:
+					start = START3;
+					break;
+				case 4:
+					start = START4;
+					break;
+				case 5:
+					start = START5;
+					break;
+				case 6:
+					start = START5;
+					break;
+				default:
+					start = 5000;
+				}
+				
+				l = new Light(cur.getX(), cur.getY(), CYCLE, ON, start);
 			}
 			
-			l = new Light(cur.getX(), cur.getY(), CYCLE, ON, start);
 			lights.add(l);
 		}
 			
