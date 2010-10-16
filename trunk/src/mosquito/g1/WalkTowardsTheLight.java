@@ -6,12 +6,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import mosquito.g1.geometries.SpaceFinder;
 import mosquito.sim.Collector;
+import mosquito.sim.GameListener;
 import mosquito.sim.Light;
 import mosquito.sim.Player;
+import mosquito.sim.GameListener.GameUpdateType;
 
 public class WalkTowardsTheLight extends Player {
+	private Logger log = Logger.getLogger(this.getClass());
 	private Set<Line2D> walls;
 	private int numLights;
 	private int INTERVAL = 40;
@@ -22,10 +27,40 @@ public class WalkTowardsTheLight extends Player {
 	private double baseX = 50;
 	private double baseY = 50;
 	private boolean [][] openGridSpots = new boolean[100][100];
+	private boolean isSimulated = false;
+	private Collector simCollector;
+	private Set<Light> simLights;
 	
 	@Override
 	public String getName() {
 		return "Walk Towards The Light 0";
+	}
+	
+	@Override
+	public void startSimulatedGame(Set<Line2D> walls, int NumLights) {
+		this.numLights = NumLights;
+	}
+	
+	private void runSimulator(Set<Light> lights, Collector col)
+	{
+		isSimulated = true;
+		simCollector = col;
+		simLights = lights;
+		this.runSimulation(5000,new GameListener() {
+			
+			@Override
+			public void gameUpdated(GameUpdateType type) {
+				if(type.equals(GameUpdateType.MOVEPROCESSED))
+				{
+					//log.debug("We had a move happen, " + getSimulationRounds() +", caught: " + getSimulationNumCaught());
+				}
+				else if(type.equals(GameUpdateType.GAMEOVER))
+				{
+					//log.debug("Game ended at ticks: " + getSimulationRounds());
+				}
+			}
+		});
+		isSimulated = false;
 	}
 
 	@Override
@@ -37,6 +72,9 @@ public class WalkTowardsTheLight extends Player {
 	Point2D lastLight = null;
 	@Override
 	public Set<Light> getLights() {
+		if(isSimulated)
+			return simLights;
+		
 		HashSet<Light> lights = new HashSet<Light>();
 		if(numLights == 3)
 		{
@@ -163,6 +201,8 @@ public class WalkTowardsTheLight extends Player {
 
 	@Override
 	public Collector getCollector() {
+		if(isSimulated)
+			return simCollector;
 		Collector c;
 		if(numLights < 8)
 			c = new Collector(baseX-0.5,baseY);
