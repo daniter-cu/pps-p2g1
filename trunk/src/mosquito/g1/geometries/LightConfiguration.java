@@ -61,13 +61,24 @@ public class LightConfiguration {
             int[] depths = new int[lightSet.size()];
             // Set all depths to an unreasonable distance
             for(int i = 0; i < depths.length; i++) {
-                depths[i] = depths.length + 1;
+                depths[i] = depths.length + 100;
             }
             
             // Calculate the depths from the trialCenter
             depths[trialCenter] = 0;
             for(int walkOut = 0; walkOut < depths.length; walkOut++) {
-                
+                boolean foundOne = false;
+                for(int i = 0; i < depths.length; i++) {
+                    if(depths[i] == walkOut) {
+                        Set<Integer> endPoints = edges.get(i);
+                        for(Integer endPoint : endPoints) {
+                            depths[endPoint] = Math.min(depths[endPoint], (walkOut+1));
+                        }
+                    }
+                }
+                if(!foundOne) {
+                    break;
+                }
             }
             
             // If it is a better average, use it
