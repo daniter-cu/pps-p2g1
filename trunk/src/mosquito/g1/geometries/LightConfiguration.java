@@ -100,11 +100,13 @@ public class LightConfiguration {
      */
     public boolean isConfigurationConnected() {
         Set<Line2D> network = connectLights();
-        
-        for(Line2D link : network) {
-            for(Line2D wall : board) {
-                if(wall.intersectsLine(link)) {
-                    return false;
+
+        if(board != null) {
+            for(Line2D link : network) {
+                for(Line2D wall : board) {
+                    if(wall.intersectsLine(link)) {
+                        return false;
+                    }
                 }
             }
         }
@@ -196,10 +198,11 @@ public class LightConfiguration {
      */
     private static Set<Line2D> wallsOverlapping(Point2D target) {
         Set<Line2D> result = new HashSet<Line2D>();
-        
-        for(Line2D l : board) {
-            if(wallShadows(target, l)) {
-                result.add(l);
+        if(board != null) {
+            for(Line2D l : board) {
+                if(wallShadows(target, l)) {
+                    result.add(l);
+                }
             }
         }
         
