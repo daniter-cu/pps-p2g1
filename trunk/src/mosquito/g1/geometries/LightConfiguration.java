@@ -18,13 +18,22 @@ public class LightConfiguration {
         lightSet = new ArrayList<Point2D>();
     }
     
+    public LightConfiguration(LightConfiguration other)
+    {
+    	lightSet = other.lightSet;
+    	centerLightIndex = other.centerLightIndex;
+    	areaCovered = other.areaCovered;
+    }
+    
     public void addCenterLight(Point2D center) {
         centerLightIndex = lightSet.size();
         this.addLight(center);
+        areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.0);
     }
     
     public void addLight(Point2D center) {
         lightSet.add(center);
+        areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.0);
     }
     
     public void addWalls(Set<Line2D> board) {
@@ -103,7 +112,7 @@ public class LightConfiguration {
      */
     public double areaCovered() {
     	if(areaCovered == -1)
-    		areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.);
+    		areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.0);
         return areaCovered;
     }
     

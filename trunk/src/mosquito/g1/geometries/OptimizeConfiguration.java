@@ -68,6 +68,7 @@ public class OptimizeConfiguration {
 		//need to keep track of pruned points
 		double []xs = new double[36 * numLights];
 		double []ys = new double[36 * numLights];
+		double []area =  new double[36 * numLights];
 		for(int i=0; i<numLights-1; i++)
 		{
 			Point2D newestLight = config.getLights().get(i);
@@ -79,6 +80,7 @@ public class OptimizeConfiguration {
 			ys[baseIndex] = centerY;
 			xs[baseIndex+35] = centerX + radius;
 			ys[baseIndex+35] = centerY;
+			
 			double increment = radius / 9.0;
 			for(int j=baseIndex; j<baseIndex + 17; j++)
 			{
@@ -90,6 +92,8 @@ public class OptimizeConfiguration {
 				
 				xs[(2*j)+2] = x;
 				ys[(2*j)+2] = -1.0 * curY;
+				
+				
 			}
 		}
 		
