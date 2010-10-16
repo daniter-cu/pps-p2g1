@@ -65,7 +65,8 @@ public class LightConfiguration {
             }
             
             // Calculate the depths from the trialCenter
-            
+            depths[trialCenter] = 0;
+            for(int walkOut = 0; )
             
             // If it is a better average, use it
             double currentAverage = averageIntArray(depths);
@@ -245,6 +246,19 @@ public class LightConfiguration {
         }
         
         return result;
+    }
+    
+    private static boolean areLightsConnected(Point2D light1, Point2D light2) {
+        Line2D connection = new Line2D.Double(light1, light2);
+        Set<Line2D> walls = wallsOverlapping(light1);
+        walls.addAll(wallsOverlapping(light2));
+        for(Line2D wall : walls) {
+            if(wall.intersectsLine(connection)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     /**
