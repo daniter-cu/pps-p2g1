@@ -41,7 +41,8 @@ public class WalkTowardsTheLight extends Player {
 		this.numLights = NumLights;
 	}
 	
-	private void runSimulator(Set<Light> lights, Collector col)
+	private static double rounds;
+	private double runSimulator(Set<Light> lights, Collector col)
 	{
 		isSimulated = true;
 		simCollector = col;
@@ -52,15 +53,18 @@ public class WalkTowardsTheLight extends Player {
 			public void gameUpdated(GameUpdateType type) {
 				if(type.equals(GameUpdateType.MOVEPROCESSED))
 				{
+					rounds = getSimulationRounds();
 					//log.debug("We had a move happen, " + getSimulationRounds() +", caught: " + getSimulationNumCaught());
 				}
 				else if(type.equals(GameUpdateType.GAMEOVER))
 				{
+					rounds = getSimulationRounds();
 					//log.debug("Game ended at ticks: " + getSimulationRounds());
 				}
 			}
 		});
 		isSimulated = false;
+		return rounds;
 	}
 
 	@Override
