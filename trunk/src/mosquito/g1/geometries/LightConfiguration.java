@@ -38,7 +38,7 @@ public class LightConfiguration {
     
     public LightConfiguration(LightConfiguration other)
     {
-        lightSet = other.lightSet;
+        lightSet = new ArrayList<Point2D>(other.lightSet);
         centerLightIndex = other.centerLightIndex;
         areaCovered = other.areaCovered;
     }

@@ -30,6 +30,7 @@ public class WalkTowardsTheLight extends Player {
 	//private double BASE = 50;
 	private double baseX = 50;
 	private double baseY = 50;
+    private static double rounds;
 	private boolean [][] openGridSpots = new boolean[100][100];
 	private boolean isSimulated = false;
 	private Collector collector;
@@ -47,7 +48,6 @@ public class WalkTowardsTheLight extends Player {
 		this.numLights = NumLights;
 	}
 	
-	private static double rounds;
 	private double runSimulator(Set<Light> lights, Collector col)
 	{
 		isSimulated = true;
@@ -82,7 +82,6 @@ public class WalkTowardsTheLight extends Player {
         LightConfiguration.addWalls(this.walls);
 	}
 
-	Point2D lastLight = null;
 	@Override
 	public Set<Light> getLights() {
 //		if(walls.size() == 0)
