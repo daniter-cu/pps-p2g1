@@ -6,6 +6,8 @@ import java.util.*;
 
 public class LightConfiguration {
     public static int LIGHT_RADIUS = 20;
+    public static int BOARD_DIMENSION = 100;
+    public static double AREA_RESOLUTION = 0.5;
     public static double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
     
     private ArrayList<Point2D> lightSet;
@@ -20,9 +22,9 @@ public class LightConfiguration {
     
     public LightConfiguration(LightConfiguration other)
     {
-    	lightSet = other.lightSet;
-    	centerLightIndex = other.centerLightIndex;
-    	areaCovered = other.areaCovered;
+        lightSet = other.lightSet;
+        centerLightIndex = other.centerLightIndex;
+        areaCovered = other.areaCovered;
     }
     
     public void addCenterLight(Point2D center) {
@@ -31,7 +33,7 @@ public class LightConfiguration {
     }
     
     public void addLight(Point2D light) {
-        areaCovered += marginalArea(light, lightSet, areaCovered);
+        areaCovered += marginalArea(light, lightSet);
         lightSet.add(light);
     }
     
@@ -43,7 +45,7 @@ public class LightConfiguration {
     
     public List<Point2D> getLights()
     {
-    	return lightSet;
+        return lightSet;
     }
     
     /**
@@ -51,41 +53,41 @@ public class LightConfiguration {
      */
     public Set<Line2D> connectLights() 
     {
-    	Set<Line2D> lines = new HashSet<Line2D>();
-    	ArrayList<Point2D> unused = new ArrayList<Point2D>(lightSet);
-    	Point2D center = lightSet.get(centerLightIndex);
-    	//remove center light
-    	for(Point2D p : unused)
-    	{
-    		if(p.equals(center));
-    			unused.remove(p);
-    	}
-    	
-    	//find all lines connected to center light
-    	for(Point2D p : unused)
-    	{
-    		if(p.distance(center) <= 25)
-    		{
-    			lines.add(new Line2D.Double(p,center));
-    			unused.remove(p);
-    		}
-    	}
-    	
-    	while(!unused.isEmpty())
-    	{
-    		Point2D temp = unused.get(0);
-    		unused.remove(temp);
-    		for(Point2D p : lightSet)
-        	{
-    			if(p.equals(temp))
-    				continue;
-        		if(p.distance(temp) <= 25)
-        		{
-        			lines.add(new Line2D.Double(p,temp));
-        		}
-        	}	
-    	}
-    	
+        Set<Line2D> lines = new HashSet<Line2D>();
+        ArrayList<Point2D> unused = new ArrayList<Point2D>(lightSet);
+        Point2D center = lightSet.get(centerLightIndex);
+        //remove center light
+        for(Point2D p : unused)
+        {
+            if(p.equals(center));
+                unused.remove(p);
+        }
+        
+        //find all lines connected to center light
+        for(Point2D p : unused)
+        {
+            if(p.distance(center) <= 25)
+            {
+                lines.add(new Line2D.Double(p,center));
+                unused.remove(p);
+            }
+        }
+        
+        while(!unused.isEmpty())
+        {
+            Point2D temp = unused.get(0);
+            unused.remove(temp);
+            for(Point2D p : lightSet)
+            {
+                if(p.equals(temp))
+                    continue;
+                if(p.distance(temp) <= 25)
+                {
+                    lines.add(new Line2D.Double(p,temp));
+                }
+            }   
+        }
+        
         return lines;
     }
     
@@ -114,22 +116,56 @@ public class LightConfiguration {
     }
     
     public static double calculateAreaCovered(List<Point2D> lightsCovered) {
-    	double areaSoFar = 0;
-    	List<Point2D> lights = new ArrayList<Point2D>();
-    	
-    	for(Point2D light : lightsCovered)
-    	{
-    		areaSoFar += marginalArea(light, lights, areaSoFar);
-    		lights.add(light);
-    	}
-    	
+        double areaSoFar = 0;
+        List<Point2D> lights = new ArrayList<Point2D>();
+        
+        for(Point2D light : lightsCovered)
+        {
+            areaSoFar += marginalArea(light, lights);
+            lights.add(light);
+        }
+        
         return areaSoFar;
     }
     
-    // TODO:finish this method
-    private static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore, double areaSoFar) {
-        double area = BASE_AREA;
-        
+    private static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore) {
+        double area = 0.;
+        Line2D connection;
+        Point2D current;
+        boolean newlyLit;
+        Set<Line2D> wallsToConsider = wallsOverlapping(newLight);
+
+        for(double x = (newLight.getX() - LIGHT_RADIUS); x <= (newLight.getX() + LIGHT_RADIUS); x+=AREA_RESOLUTION) {
+            if(x < BOARD_DIMENSION && x >= 0) {
+                for(double y = (newLight.getY() - LIGHT_RADIUS); y <= (newLight.getY() + LIGHT_RADIUS); y+=AREA_RESOLUTION) {
+                    if(y < BOARD_DIMENSION && y >= 0) {
+                        current = new Point2D.Double(x, y);
+                        if(current.distance(newLight) <= LIGHT_RADIUS) {
+                            connection = new Line2D.Double(current, newLight);
+                            newlyLit = true;
+                            for(Line2D wall : wallsToConsider) {
+                                if(wall.intersectsLine(connection)) {
+                                    newlyLit = false;
+                                    break;
+                                }
+
+                                for(Point2D oldLight : lightsToIgnore) {
+                                    if(wall.intersectsLine(new Line2D.Double(current, oldLight))) {
+                                        newlyLit = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if(newlyLit) {
+                                area += (AREA_RESOLUTION * AREA_RESOLUTION);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return area;
     }
     
@@ -154,8 +190,7 @@ public class LightConfiguration {
      * @param index The light to check around
      * @return Which walls overlap that light's area after shifting.
      */
-    private Set<Line2D> wallsOverlapping(int index) {
-        Point2D target = lightSet.get(index);
+    private static Set<Line2D> wallsOverlapping(Point2D target) {
         Set<Line2D> result = new HashSet<Line2D>();
         
         for(Line2D l : board) {
@@ -170,7 +205,7 @@ public class LightConfiguration {
     /**
      * @return Whether the wall might enter the light's perimeter.
      */
-    private boolean wallShadows(Point2D light, Line2D wall) {
+    private static boolean wallShadows(Point2D light, Line2D wall) {
         return (wall.ptLineDist(light) < LIGHT_RADIUS);
     }
     
