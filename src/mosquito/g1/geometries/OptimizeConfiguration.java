@@ -10,7 +10,7 @@ public class OptimizeConfiguration {
 	private LinkedList<LightConfiguration> randConfigs;
 	private int numLights;
 	private double radius = 20;
-	private final double AREA_THRESHOLD = 50;
+	private final double AREA_THRESHOLD = 0;
 	private final int MAX_ITERATIONS = 50;
 	private final int MAX_CONFIGS = 10;
 

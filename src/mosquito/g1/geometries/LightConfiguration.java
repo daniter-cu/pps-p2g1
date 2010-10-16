@@ -20,7 +20,7 @@ public class LightConfiguration {
 	
     public static int LIGHT_RADIUS = 20;
     public static int BOARD_DIMENSION = 100;
-    public static double AREA_RESOLUTION = 0.5;
+    public static double AREA_RESOLUTION = 1.0;
     public static double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
     
     private ArrayList<Point2D> lightSet;
@@ -285,6 +285,11 @@ public class LightConfiguration {
     }
     
     public static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore) {
+        System.out.println("The new light ["+newLight.getX()+", "+newLight.getY()+"]");
+        for(Point2D light : lightsToIgnore) {
+            System.out.println("The old light ["+light.getX()+", "+light.getY()+"]");
+        }
+        
         double area = 0.;
         Line2D connection;
         Point2D current;
@@ -300,27 +305,36 @@ public class LightConfiguration {
                         if(current.distance(newLight) <= LIGHT_RADIUS) {
                             connection = new Line2D.Double(current, newLight);
                             newlyLit = true;
-                            previouslyLit = true;
-                            for(Point2D oldLight : lightsToIgnore) {
-                                for(Line2D wall : wallsToConsider) {
-                                    if(wall.intersectsLine(connection)) {
-                                        newlyLit = false;
-                                        break;
-                                    }
-
-                                    if(current.distance(oldLight) > LIGHT_RADIUS ||
-                                            wall.intersectsLine(new Line2D.Double(current, oldLight))) {
-                                        previouslyLit = false;
-                                        break;
-                                    }
-                                }
-                                if(!newlyLit || previouslyLit) {
+                            for(Line2D wall : wallsToConsider) {
+                                if(wall.intersectsLine(connection)) {
+                                    newlyLit = false;
                                     break;
                                 }
                             }
-
-                            if(newlyLit && !previouslyLit) {
-                                area += (AREA_RESOLUTION * AREA_RESOLUTION);
+                            if(newlyLit) {
+                                previouslyLit = false;
+                                for(Point2D oldLight : lightsToIgnore) {
+                                    boolean litByThisLight = true;
+                                    if(oldLight.distance(current) > LIGHT_RADIUS) {
+                                        litByThisLight = false;
+                                    } else {
+                                        connection = new Line2D.Double(current, oldLight);
+                                        for(Line2D wall : wallsToConsider) {
+                                            if(wall.intersectsLine(connection)) {
+                                                litByThisLight = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if(litByThisLight) {
+                                        previouslyLit = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if(newlyLit && !previouslyLit) {
+                                    area += (AREA_RESOLUTION * AREA_RESOLUTION);
+                                }
                             }
                         }
                     }
@@ -446,7 +460,7 @@ public class LightConfiguration {
         Point2D center = lights.get(0);
         lights.remove(0);
         LightConfiguration.clearBoard();
-        LightConfiguration.addWalls(board);
+        //LightConfiguration.addWalls(board);
         System.out.println(LightConfiguration.marginalArea(center, lights));
     }
 }
