@@ -86,6 +86,7 @@ public class LightConfiguration {
                 boolean foundOne = false;
                 for(int i = 0; i < depths.length; i++) {
                     if(depths[i] == walkOut) {
+                        foundOne = true;
                         Set<Integer> endPoints = edges.get(i);
                         for(Integer endPoint : endPoints) {
                             depths[endPoint] = Math.min(depths[endPoint], (walkOut+1));
