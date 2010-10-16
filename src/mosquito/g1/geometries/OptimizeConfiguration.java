@@ -1,39 +1,35 @@
 package mosquito.g1.geometries;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
-
-import mosquito.sim.Light;
 
 public class OptimizeConfiguration {
-	private Light[] seedLights;
-	private Set<Line2D> walls;
-	private LinkedList<LightConfiguration> randConfigs = new LinkedList<LightConfiguration>();
+	private LinkedList<Point2D> seedLights;
+	private LinkedList<LightConfiguration> randConfigs;
 	private int numLights;
 	private double radius = 20;
 	private final double AREA_THRESHOLD = 100;
 
-	public OptimizeConfiguration(Light[] seedLights, Set<Line2D> walls, int numLights)
+	public OptimizeConfiguration(LinkedList<Point2D> seedLights, int numLights)
 	{
 		this.seedLights = seedLights;
-		this.walls = walls;
 		this.numLights = numLights;
 	}
 	
 	public LightConfiguration calcOptimumConfig()
 	{
+		randConfigs = new LinkedList<LightConfiguration>();
 		LightConfiguration currentConfig = new LightConfiguration();
 		
-		for(int i=0; i<seedLights.length; i++)
+		//create 100,000 configurations
+		for(Point2D p : seedLights)
 		{
 			for(int j=0; j<1000; j++)
 			{
 				currentConfig = new LightConfiguration();
-				currentConfig.addLight(seedLights[i].getLocation());
+				currentConfig.addLight(p);
 				
 				currentConfig = findRandomConfiguration(currentConfig);
 				ListIterator<LightConfiguration> it = randConfigs.listIterator();
@@ -53,30 +49,31 @@ public class OptimizeConfiguration {
 			}
 		}
 		
-		return currentConfig;
+		return randConfigs.getFirst();
 	}
 
-	private LightConfiguration findRandomConfiguration(
-			LightConfiguration currentConfig) {
+	//need to add uniqueness check
+	//need to keep track of pruned points
+	private LightConfiguration findRandomConfiguration(LightConfiguration currentConfig) {
 		
+		//instantiate local variables
 		LightConfiguration config = new LightConfiguration(currentConfig);
-		
-		//need to add uniqueness check
-		//need to keep track of pruned points
-		List<Point2D> currentLights = config.getLights();
-		double currentArea;
-		
+		List<Point2D> currentLights;
 		LinkedList<Point2D> points = new LinkedList<Point2D>();
 		LinkedList<Double> areas;
 		Point2D l;
 		double x, y, area, maxArea, totalArea;
 
+		//create a random configuration
 		for(int i=0; i<numLights-1; i++)
 		{
-			currentArea = config.areaCovered();
+			//reset local variables
+			currentLights = config.getLights();
 			maxArea = 0;
 			totalArea = 0;
 			areas = new LinkedList<Double>();
+			
+			//recalculate marginal area for all seen points
 			ListIterator<Point2D> it = points.listIterator();
 			while(it.hasNext())
 			{
@@ -95,6 +92,7 @@ public class OptimizeConfiguration {
 				}
 			}
 			
+			//add leftmost point to potentials
 			Point2D newestLight = currentLights.get(i);
 			double centerX = newestLight.getX();
 			double centerY = newestLight.getY();
@@ -112,7 +110,7 @@ public class OptimizeConfiguration {
 				areas.add(area);
 			}
 				
-			
+			//add rightmost point to potentials
 			x = centerX + radius;
 			l = new Point2D.Double(x, y);
 			area = LightConfiguration.marginalArea(l, currentLights);
@@ -125,6 +123,7 @@ public class OptimizeConfiguration {
 				areas.add(area);
 			}
 			
+			//add all central points to potentials
 			double increment = radius / 9.0;
 			for(int j=-8; j<9; j++)
 			{
@@ -154,6 +153,7 @@ public class OptimizeConfiguration {
 				}
 			}
 			
+			//weight by marginal area and choose a random point for light placement
 			int next = (int) (Math.random() * totalArea);
 			ListIterator<Double> itr = areas.listIterator();
 			ListIterator<Point2D> litr = points.listIterator();
@@ -168,7 +168,9 @@ public class OptimizeConfiguration {
 				}
 			}
 			
+			//add chosen light to the configuration and remove it from potentials 
 			config.addLight(curLight);
+			litr.remove();
 		}
 		
 		return config;
