@@ -289,6 +289,7 @@ public class LightConfiguration {
         Line2D connection;
         Point2D current;
         boolean newlyLit;
+        boolean previouslyLit;
         Set<Line2D> wallsToConsider = wallsOverlapping(newLight);
 
         for(double x = (newLight.getX() - LIGHT_RADIUS); x <= (newLight.getX() + LIGHT_RADIUS); x+=AREA_RESOLUTION) {
@@ -299,21 +300,26 @@ public class LightConfiguration {
                         if(current.distance(newLight) <= LIGHT_RADIUS) {
                             connection = new Line2D.Double(current, newLight);
                             newlyLit = true;
-                            for(Line2D wall : wallsToConsider) {
-                                if(wall.intersectsLine(connection)) {
-                                    newlyLit = false;
-                                    break;
-                                }
-
-                                for(Point2D oldLight : lightsToIgnore) {
-                                    if(wall.intersectsLine(new Line2D.Double(current, oldLight))) {
+                            previouslyLit = true;
+                            for(Point2D oldLight : lightsToIgnore) {
+                                for(Line2D wall : wallsToConsider) {
+                                    if(wall.intersectsLine(connection)) {
                                         newlyLit = false;
                                         break;
                                     }
+
+                                    if(current.distance(oldLight) > LIGHT_RADIUS ||
+                                            wall.intersectsLine(new Line2D.Double(current, oldLight))) {
+                                        previouslyLit = false;
+                                        break;
+                                    }
+                                }
+                                if(!newlyLit || previouslyLit) {
+                                    break;
                                 }
                             }
-                            
-                            if(newlyLit) {
+
+                            if(newlyLit && !previouslyLit) {
                                 area += (AREA_RESOLUTION * AREA_RESOLUTION);
                             }
                         }
