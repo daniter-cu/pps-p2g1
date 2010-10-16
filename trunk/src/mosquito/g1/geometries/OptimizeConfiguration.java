@@ -20,6 +20,12 @@ public class OptimizeConfiguration {
 	
 	public LightConfiguration calcOptimumConfig()
 	{
+		if(seedLights.size() == 0)
+		{
+			System.err.println("No seed lights!");
+			return null;
+		}
+		
 		randConfigs = new LinkedList<LightConfiguration>();
 		LightConfiguration currentConfig = new LightConfiguration();
 		

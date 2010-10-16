@@ -73,10 +73,10 @@ public class WalkTowardsTheLight extends Player {
 	public void startNewGame(Set<Line2D> walls, int NumLights) {
 		this.numLights = NumLights;
         LightConfiguration.clearBoard();
-        LightConfiguration.addWalls(walls);
         if(walls != null)
         	this.walls = walls;
-		SpaceFinder finder = new SpaceFinder(walls);
+        LightConfiguration.addWalls(this.walls);
+		SpaceFinder finder = new SpaceFinder(this.walls);
 		OptimizeConfiguration optimum = new OptimizeConfiguration(finder.getSeeds(), numLights);
 		LightConfiguration l = optimum.calcOptimumConfig();
 		System.out.println("printing lights");
