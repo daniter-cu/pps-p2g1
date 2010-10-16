@@ -54,7 +54,7 @@ public class LightConfiguration {
     private int[] calculateOptimalDepths() {
         int[] bestDepths = new int[0];
         double bestAverage = Double.POSITIVE_INFINITY;
-        Map<Integer, Integer> edges = calculateEdges();
+        Map<Integer, Set<Integer>> edges = calculateEdges();
         
         for(int trialCenter = 0; trialCenter < lightSet.size(); trialCenter++) {
             // Create an array for calculating these depths
@@ -65,6 +65,7 @@ public class LightConfiguration {
             }
             
             // Calculate the depths from the trialCenter
+            
             
             // If it is a better average, use it
             double currentAverage = averageIntArray(depths);
@@ -85,16 +86,20 @@ public class LightConfiguration {
         return sum / ((double) toAverage.length);
     }
     
-    private Map<Integer, Integer> calculateEdges() {
-        Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+    private Map<Integer, Set<Integer>> calculateEdges() {
+        Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
+        
+        for(int i = 0; i < lightSet.size(); i++) {
+            result.put(i, new HashSet<Integer>());
+        }
         
         for(int i = 0; i < lightSet.size(); i++) {
             for(int j = i + 1; j < lightSet.size(); i++) {
                 Point2D light1 = lightSet.get(i);
                 Point2D light2 = lightSet.get(j);
                 if(light1.distance(light2) <= LIGHT_RADIUS) {
-                    result.put(i, j);
-                    result.put(j, i);
+                    result.get(i).add(j);
+                    result.get(j).add(i);
                 }
             }
         }
