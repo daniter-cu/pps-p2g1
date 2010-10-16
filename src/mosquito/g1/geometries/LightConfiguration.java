@@ -47,9 +47,59 @@ public class LightConfiguration {
         board = null;
     }
     
-    public List<Point2D> getLights()
-    {
+    public List<Point2D> getLights() {
         return lightSet;
+    }
+    
+    private int[] calculateOptimalDepths() {
+        int[] bestDepths = new int[0];
+        double bestAverage = Double.POSITIVE_INFINITY;
+        Map<Integer, Integer> edges = calculateEdges();
+        
+        for(int trialCenter = 0; trialCenter < lightSet.size(); trialCenter++) {
+            // Create an array for calculating these depths
+            int[] depths = new int[lightSet.size()];
+            // Set all depths to -1
+            for(int i = 0; i < depths.length; i++) {
+                depths[i] = -1;
+            }
+            
+            // Calculate the depths from the trialCenter
+            
+            // If it is a better average, use it
+            double currentAverage = averageIntArray(depths);
+            if(currentAverage< bestAverage) {
+                bestAverage = currentAverage;
+                bestDepths = depths;
+            }
+        }
+        
+        return bestDepths;
+    }
+    
+    private static double averageIntArray(int[] toAverage) {
+        int sum = 0;
+        for(int i = 0; i < toAverage.length; i++) {
+            sum += toAverage[i];
+        }
+        return sum / ((double) toAverage.length);
+    }
+    
+    private Map<Integer, Integer> calculateEdges() {
+        Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+        
+        for(int i = 0; i < lightSet.size(); i++) {
+            for(int j = i + 1; j < lightSet.size(); i++) {
+                Point2D light1 = lightSet.get(i);
+                Point2D light2 = lightSet.get(j);
+                if(light1.distance(light2) <= LIGHT_RADIUS) {
+                    result.put(i, j);
+                    result.put(j, i);
+                }
+            }
+        }
+        
+        return result;
     }
     
     /**
@@ -239,5 +289,31 @@ public class LightConfiguration {
             }
         }
         return result;
+    }
+    
+    public static void main(String[] args) {
+        List<Point2D> lights = new ArrayList<Point2D>();
+        Set<Line2D> board = new HashSet<Line2D>();
+        int i;
+        for(i = 0; !args[i].equals("and"); i++) {
+            if(i%2 == 1) {
+                lights.add(new Point2D.Double(Double.parseDouble(args[i-1]), Double.parseDouble(args[i])));
+            }
+        }
+        
+        i++;
+        
+        for(int initI = i; i < args.length; i++) {
+            if((initI - i)%4 == 3) {
+                board.add(new Line2D.Double(new Point2D.Double(Double.parseDouble(args[i-3]), Double.parseDouble(args[i-2])),
+                    new Point2D.Double(Double.parseDouble(args[i-1]), Double.parseDouble(args[i]))));
+            }
+        }
+        
+        Point2D center = lights.get(0);
+        lights.remove(0);
+        LightConfiguration.clearBoard();
+        LightConfiguration.addWalls(board);
+        System.out.println(LightConfiguration.marginalArea(center, lights));
     }
 }
