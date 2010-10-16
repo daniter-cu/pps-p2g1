@@ -16,6 +16,7 @@ public class SpaceFinder {
 	
 	public SpaceFinder(Set<Line2D> walls)
 	{
+		seeds = new LinkedList<OurLight>();
 		center = new Point2D.Double(50,50);
 		radius = 0;
 		walls.add(new Line2D.Double(new Point2D.Double(0,0), new Point2D.Double(100,0)));
