@@ -8,10 +8,10 @@ public class LightConfiguration {
     public static int LIGHT_RADIUS = 20;
     public static double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
     
-    private List<Point2D> lightSet;
+    private ArrayList<Point2D> lightSet;
     private int centerLightIndex;
     private static Set<Line2D> board;
-    private double areaCovered = -1;
+    private double areaCovered = 0;
     
     public LightConfiguration() {
         centerLightIndex = -1;
@@ -27,16 +27,15 @@ public class LightConfiguration {
     
     public void addCenterLight(Point2D center) {
         centerLightIndex = lightSet.size();
-        this.addLight(center);
-        areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.0);
+        addLight(center);
     }
     
-    public void addLight(Point2D center) {
-        lightSet.add(center);
-        areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.0);
+    public void addLight(Point2D light) {
+        areaCovered += marginalArea(light, lightSet, areaCovered);
+        lightSet.add(light);
     }
     
-    public void addWalls(Set<Line2D> board) {
+    public static void addWalls(Set<Line2D> board) {
         if(board == null) {
             LightConfiguration.board = board;
         }
@@ -111,22 +110,25 @@ public class LightConfiguration {
      * @return The total area illuminated by this configuration with the current shift amount.
      */
     public double areaCovered() {
-    	if(areaCovered == -1)
-    		areaCovered = calculateAreaCovered(0, new HashSet<Point2D>(), 0.0);
         return areaCovered;
     }
     
-    private double calculateAreaCovered(int position, Set<Point2D> lightsCovered, double areaSoFar) {
-        areaSoFar += areaForLight(position, lightsCovered);
-        lightsCovered.add(lightSet.get(position));
-        return calculateAreaCovered(position + 1, lightsCovered, areaSoFar);
+    public static double calculateAreaCovered(List<Point2D> lightsCovered) {
+    	double areaSoFar = 0;
+    	List<Point2D> lights = new ArrayList<Point2D>();
+    	
+    	for(Point2D light : lightsCovered)
+    	{
+    		areaSoFar += marginalArea(light, lights, areaSoFar);
+    		lights.add(light);
+    	}
+    	
+        return areaSoFar;
     }
     
     // TODO:finish this method
-    private double areaForLight(int index, Set<Point2D> lightsToIgnore) {
+    private static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore, double areaSoFar) {
         double area = BASE_AREA;
-        
-        
         
         return area;
     }
