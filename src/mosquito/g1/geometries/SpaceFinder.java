@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 
 public class SpaceFinder {
-
+	
+	private Logger log = Logger.getLogger(this.getClass());
 	private double radius;
 	private Point2D center;
 	private LinkedList<OurLight> seeds; 
@@ -57,42 +61,58 @@ public class SpaceFinder {
 			}
 		}
 		Collections.shuffle(seeds);
+		log.debug("THESE ARE THE SEED POINTS:");
+		for(OurLight a : seeds)
+		{
+			log.debug(a);
+		}
 	}
 	
 	private void addNprune(OurLight l)
 	{
 		boolean added = false;
+		boolean useless = false;
 		if(seeds.isEmpty())
 		{
 			seeds.add(l);
 			return;
 		}
-		for(OurLight seed : seeds)
+		ListIterator<OurLight> it = seeds.listIterator();
+		OurLight seed;
+		while(it.hasNext())
 		{
+			seed = it.next();
 			if(added)
 			{
 				//prune close ones
 				if(seed.point.distance(l.point) < 5)
-					seeds.remove(seed);
+					it.remove();
 			}
 			else
 			{
 				//check if larger one within range, if so break
 				if(seed.point.distance(l.point) < 5 && seed.coverage >= l.coverage)
 				{
+					useless = true;
 					break;
 				}
 				//insert
 				if(l.coverage > seed.coverage)
 				{
-					seeds.add(seeds.indexOf(seed), l);
+					//seeds.add(seeds.indexOf(seed), l);
+					it.previous();
+					it.add(l);
 					added = true;
-					if(l.point.distance(seed.point) < 5)
+					/*if(l.point.distance(seed.point) < 5)
 					{
-						seeds.remove(seed);
-					}
+						it.remove();
+					}*/
 				}
 			}
+		}
+		if(!added && !useless)
+		{
+			seeds.add(l);
 		}
 	}
 	
@@ -126,6 +146,11 @@ public class SpaceFinder {
 		{
 			point = p;
 			coverage = c;
+		}
+		
+		public String toString()
+		{
+			return point.toString();
 		}
 	}
 }
