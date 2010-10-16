@@ -2,8 +2,10 @@ package mosquito.g1;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -30,6 +32,8 @@ public class WalkTowardsTheLight extends Player {
 	private double baseY = 50;
 	private boolean [][] openGridSpots = new boolean[100][100];
 	private boolean isSimulated = false;
+	private Collector collector;
+	private Set<Light> lights;
 	private Collector simCollector;
 	private Set<Light> simLights;
 	
@@ -76,63 +80,70 @@ public class WalkTowardsTheLight extends Player {
         if(walls != null)
         	this.walls = walls;
         LightConfiguration.addWalls(this.walls);
-		SpaceFinder finder = new SpaceFinder(this.walls);
-		OptimizeConfiguration optimum = new OptimizeConfiguration(finder.getSeeds(), numLights);
-		LightConfiguration l = optimum.calcOptimumConfig();
-		System.out.println("printing lights");
-		for(Point2D p : l.getLights())
-		{
-			System.out.println(p.getX() + " " + p.getY());
-		}
 	}
 
 	Point2D lastLight = null;
 	@Override
 	public Set<Light> getLights() {
+//		if(walls.size() == 0)
+//			return getCentralShape(DISPLACEMENTS[numLights - 1], 2);
+		
 		if(isSimulated)
 			return simLights;
 		
-		HashSet<Light> lights = new HashSet<Light>();
-		if(numLights == 3)
+		SpaceFinder finder = new SpaceFinder(this.walls);
+		LinkedList<Point2D> seeds = finder.getSeeds();
+		OptimizeConfiguration optimum = new OptimizeConfiguration(seeds, numLights);
+		LightConfiguration l = optimum.calcOptimumConfig();
+		l.calculateOptimalDepths();
+		System.out.println("printing lights");
+		for(Point2D p : l.getLights())
 		{
-			double length = Math.sqrt(Math.pow(20, 2) / 2.0) - 0.5;
-			Light l1 = new Light(baseX,baseY,1,1,0);
-			Light l2 = new Light(baseX - length, baseY - length, 45, 20, 0);
-			Light l3 = new Light(l2.getX() - length, l2.getY() - length, 45, 20, 24);
-			
-			lights.add(l1);
-			lights.add(l2);
-			lights.add(l3);
-			
-			return lights;
+			System.out.println(p.getX() + " " + p.getY());
 		}
+		
+		collector = l.getCollector();
+		return l.getActualLights();
+		
+//		HashSet<Light> lights = new HashSet<Light>();
+//		if(numLights == 3)
+//		{
+//			double length = Math.sqrt(Math.pow(20, 2) / 2.0) - 0.5;
+//			Light l1 = new Light(baseX,baseY,1,1,0);
+//			Light l2 = new Light(baseX - length, baseY - length, 45, 20, 0);
+//			Light l3 = new Light(l2.getX() - length, l2.getY() - length, 45, 20, 24);
+//			
+//			lights.add(l1);
+//			lights.add(l2);
+//			lights.add(l3);
+//			
+//			return lights;
+//		}
 		
 		//if empty board, return optimal configuration
-		if(walls.size() == 0)
-			return getCentralShape(DISPLACEMENTS[numLights - 1], 2);
 		
 		//find largest circle and extract coordinates
-		SpaceFinder finder = new SpaceFinder(walls);
-		double radius = finder.getRadius();
-		//System.err.println(radius);
-		baseX = finder.getCenter().getX();
-		baseY = finder.getCenter().getY();
-		//System.err.println(baseX + ", " + baseY);
-		
-		//calculate proper displacement
-		double offset = 1;
-		int levels = 1;
-		offset = Math.sqrt( Math.pow(radius, 2) / 2 );
-		if(numLights > 7)
-		{
-			offset /= 2;
-			levels = 2;
-		}
+//		SpaceFinder finder = new SpaceFinder(walls);
+//		double radius = finder.getRadius();
+//		//System.err.println(radius);
+//		baseX = finder.getCenter().getX();
+//		baseY = finder.getCenter().getY();
+//		//System.err.println(baseX + ", " + baseY);
+//		
+//		//calculate proper displacement
+//		double offset = 1;
+//		int levels = 1;
+//		offset = Math.sqrt( Math.pow(radius, 2) / 2 );
+//		if(numLights > 7)
+//		{
+//			offset /= 2;
+//			levels = 2;
+//		}
 		
 		//System.err.println(offset);
 		
 		//find relative best spot given configuration
-		return getCentralShape(Math.min(offset, 14), levels);
+		//return getCentralShape(Math.min(offset, 14), levels);
 	}
 	
 	//returns the set of lights representing the largest center shape that can fit on the board
@@ -218,16 +229,9 @@ public class WalkTowardsTheLight extends Player {
 
 	@Override
 	public Collector getCollector() {
-		if(isSimulated)
-			return simCollector;
-		Collector c;
-		if(numLights < 8)
-			c = new Collector(baseX-0.5,baseY);
-		else
-			c = new Collector(baseX, baseY);
-		return c;
+		//if(isSimulated)
+		//	return simCollector;
+		return collector;
 	}
-
-
 }
 

@@ -4,7 +4,20 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.*;
 
+import mosquito.sim.Collector;
+import mosquito.sim.Light;
+
 public class LightConfiguration {
+	public static final int GAP = 4;
+	public static final int ON = 17;
+	public static final int CYCLE = (ON * 2) + GAP;
+	public static final int START1 = 0;
+	public static final int START2 = (START1 + ON + GAP) % CYCLE;
+	public static final int START3 = (START2 + ON + GAP) % CYCLE;
+	public static final int START4 = (START3 + ON + GAP) % CYCLE;
+	public static final int START5 = (START4 + ON + GAP) % CYCLE;
+	public static final int START6 = (START5 + ON + GAP) % CYCLE;
+	
     public static int LIGHT_RADIUS = 20;
     public static int BOARD_DIMENSION = 100;
     public static double AREA_RESOLUTION = 0.5;
@@ -14,6 +27,9 @@ public class LightConfiguration {
     private int centerLightIndex;
     private static Set<Line2D> board;
     private double areaCovered = 0;
+    
+    private Set<Light> lights;
+    private Collector c;
     
     public LightConfiguration() {
         centerLightIndex = -1;
@@ -51,7 +67,7 @@ public class LightConfiguration {
         return lightSet;
     }
     
-    private int[] calculateOptimalDepths() {
+    public void calculateOptimalDepths() {
         int[] bestDepths = new int[0];
         double bestAverage = Double.POSITIVE_INFINITY;
         Map<Integer, Set<Integer>> edges = calculateEdges();
@@ -89,7 +105,60 @@ public class LightConfiguration {
             }
         }
         
-        return bestDepths;
+        createLights(bestDepths);
+    }
+    
+    private void createLights(int[] depths)
+	{
+		lights = new HashSet<Light>();
+		Light l;
+		for(int i=0; i<depths.length; i++)
+		{
+			int start = 0;
+			Point2D cur = lightSet.get(i);
+			
+			switch(depths[i])
+			{
+			case 0:
+				c = new Collector(cur.getX() - 0.5, cur.getY());
+				start = START1;
+				break;
+			case 1:
+				start = START1;
+				break;
+			case 2:
+				start = START2;
+				break;
+			case 3:
+				start = START3;
+				break;
+			case 4:
+				start = START4;
+				break;
+			case 5:
+				start = START5;
+				break;
+			case 6:
+				start = START5;
+				break;
+			default:
+				start = 5000;
+			}
+			
+			l = new Light(cur.getX(), cur.getY(), CYCLE, ON, start);
+			lights.add(l);
+		}
+			
+	}
+    
+    public Set<Light> getActualLights()
+    {
+    	return lights;
+    }
+    
+    public Collector getCollector()
+    {
+    	return c;
     }
     
     private static double averageIntArray(int[] toAverage) {
@@ -108,7 +177,7 @@ public class LightConfiguration {
         }
         
         for(int i = 0; i < lightSet.size(); i++) {
-            for(int j = i + 1; j < lightSet.size(); i++) {
+            for(int j = i + 1; j < lightSet.size(); j++) {
                 Point2D light1 = lightSet.get(i);
                 Point2D light2 = lightSet.get(j);
                 if(light1.distance(light2) <= LIGHT_RADIUS) {
