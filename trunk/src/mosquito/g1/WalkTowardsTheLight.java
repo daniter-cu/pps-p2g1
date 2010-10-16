@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import mosquito.g1.geometries.LightConfiguration;
+import mosquito.g1.geometries.OptimizeConfiguration;
 import mosquito.g1.geometries.SpaceFinder;
 import mosquito.sim.Collector;
 import mosquito.sim.GameListener;
@@ -18,7 +19,7 @@ import mosquito.sim.GameListener.GameUpdateType;
 
 public class WalkTowardsTheLight extends Player {
 	private Logger log = Logger.getLogger(this.getClass());
-	private Set<Line2D> walls;
+	private Set<Line2D> walls = new HashSet<Line2D>();
 	private int numLights;
 	private int INTERVAL = 40;
 	private int ON_TIME = 20;
@@ -73,7 +74,16 @@ public class WalkTowardsTheLight extends Player {
 		this.numLights = NumLights;
         LightConfiguration.clearBoard();
         LightConfiguration.addWalls(walls);
-		this.walls = walls;
+        if(walls != null)
+        	this.walls = walls;
+		SpaceFinder finder = new SpaceFinder(walls);
+		OptimizeConfiguration optimum = new OptimizeConfiguration(finder.getSeeds(), numLights);
+		LightConfiguration l = optimum.calcOptimumConfig();
+		System.out.println("printing lights");
+		for(Point2D p : l.getLights())
+		{
+			System.out.println(p.getX() + " " + p.getY());
+		}
 	}
 
 	Point2D lastLight = null;
