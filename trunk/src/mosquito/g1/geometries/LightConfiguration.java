@@ -248,6 +248,16 @@ public class LightConfiguration {
         return result;
     }
     
+    public boolean isReachableFromConfiguration(Point2D newLight) {
+        for(Point2D light : lightSet) {
+            if(areConnected(newLight, light)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     private static boolean areConnected(Point2D light1, Point2D light2) {
         if(light1.distance(light2) > LIGHT_RADIUS) {
             return false;
