@@ -59,14 +59,16 @@ public class LightConfiguration {
         for(int trialCenter = 0; trialCenter < lightSet.size(); trialCenter++) {
             // Create an array for calculating these depths
             int[] depths = new int[lightSet.size()];
-            // Set all depths to -1
+            // Set all depths to an unreasonable distance
             for(int i = 0; i < depths.length; i++) {
-                depths[i] = -1;
+                depths[i] = depths.length + 1;
             }
             
             // Calculate the depths from the trialCenter
             depths[trialCenter] = 0;
-            for(int walkOut = 0; )
+            for(int walkOut = 0; walkOut < depths.length; walkOut++) {
+                
+            }
             
             // If it is a better average, use it
             double currentAverage = averageIntArray(depths);
