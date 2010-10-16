@@ -128,7 +128,7 @@ public class LightConfiguration {
         return areaSoFar;
     }
     
-    private static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore) {
+    public static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore) {
         double area = 0.;
         Line2D connection;
         Point2D current;
