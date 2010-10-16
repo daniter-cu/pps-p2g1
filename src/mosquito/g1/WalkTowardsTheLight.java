@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import mosquito.g1.geometries.LightConfiguration;
 import mosquito.g1.geometries.SpaceFinder;
 import mosquito.sim.Collector;
 import mosquito.sim.GameListener;
@@ -70,6 +71,8 @@ public class WalkTowardsTheLight extends Player {
 	@Override
 	public void startNewGame(Set<Line2D> walls, int NumLights) {
 		this.numLights = NumLights;
+        LightConfiguration.clearBoard();
+        LightConfiguration.addWalls(walls);
 		this.walls = walls;
 	}
 

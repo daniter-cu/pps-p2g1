@@ -43,6 +43,10 @@ public class LightConfiguration {
         }
     }
     
+    public static void clearBoard() {
+        board = null;
+    }
+    
     public List<Point2D> getLights()
     {
         return lightSet;
