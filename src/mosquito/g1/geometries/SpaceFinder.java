@@ -3,6 +3,7 @@ package mosquito.g1.geometries;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
@@ -55,6 +56,7 @@ public class SpaceFinder {
 				addNprune(l);
 			}
 		}
+		Collections.shuffle(seeds);
 	}
 	
 	private void addNprune(OurLight l)
