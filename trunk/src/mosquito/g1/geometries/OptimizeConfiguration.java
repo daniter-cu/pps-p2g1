@@ -32,7 +32,7 @@ public class OptimizeConfiguration {
 		//create 100,000 configurations
 		for(Point2D p : seedLights)
 		{
-			for(int j=0; j<1000; j++)
+			for(int j=0; j<100; j++)
 			{
 				currentConfig = new LightConfiguration();
 				currentConfig.addLight(p);
@@ -69,6 +69,7 @@ public class OptimizeConfiguration {
 		LinkedList<Double> areas;
 		Point2D l;
 		double x, y, area=0, maxArea, totalArea;
+		boolean reachable;
 
 		//create a random configuration
 		for(int i=0; i<numLights-1; i++)
@@ -84,20 +85,17 @@ public class OptimizeConfiguration {
 			while(it.hasNext())
 			{
 				Point2D p = it.next();
-				if(config.isReachableFromConfiguration(p))
+				area = LightConfiguration.marginalArea(p, currentLights);
+				if(area < AREA_THRESHOLD)
 				{
-					area = LightConfiguration.marginalArea(p, currentLights);
-					if(area < AREA_THRESHOLD)
-					{
-						it.remove();
-					}
-					else
-					{
-						areas.add(area);
-						if(area > maxArea)
-							maxArea = area;
-						totalArea += area;
-					}
+					it.remove();
+				}
+				else
+				{
+					areas.add(area);
+					if(area > maxArea)
+						maxArea = area;
+					totalArea += area;
 				}
 			}
 			
@@ -109,33 +107,27 @@ public class OptimizeConfiguration {
 			x = centerX - radius;
 			y = centerY;
 			l = new Point2D.Double(x, y);
-			if(config.isReachableFromConfiguration(l))
+			reachable  = config.isReachableFromConfiguration(l);
+			area = LightConfiguration.marginalArea(l, currentLights);
+			if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
 			{
-				area = LightConfiguration.marginalArea(l, currentLights);
-				if(area > AREA_THRESHOLD)
-				{
-					if(area > maxArea)
-						maxArea = area;
-					totalArea += area;
-					points.add(l);
-					areas.add(area);
-				}
+				areas.add(area);
+				if(area > maxArea)
+					maxArea = area;
+				totalArea += area;
 			}
 				
 			//add rightmost point to potentials
 			x = centerX + radius;
 			l = new Point2D.Double(x, y);
-			if(config.isReachableFromConfiguration(l))
+			reachable  = config.isReachableFromConfiguration(l);
+			area = LightConfiguration.marginalArea(l, currentLights);
+			if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
 			{
-				area = LightConfiguration.marginalArea(l, currentLights);
-				if(area > AREA_THRESHOLD)
-				{
-					if(area > maxArea)
-						maxArea = area;
-					totalArea += area;
-					points.add(l);
-					areas.add(area);
-				}
+				areas.add(area);
+				if(area > maxArea)
+					maxArea = area;
+				totalArea += area;
 			}
 			
 			//add all central points to potentials
@@ -146,33 +138,27 @@ public class OptimizeConfiguration {
 				y = getY(x, centerX, centerY);
 				l = new Point2D.Double(x, y);
 				
-				if(config.isReachableFromConfiguration(l))
+				reachable  = config.isReachableFromConfiguration(l);
+				area = LightConfiguration.marginalArea(l, currentLights);
+				if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
 				{
-					area = LightConfiguration.marginalArea(l, currentLights);
-					if(area > AREA_THRESHOLD)
-					{
-						if(area > maxArea)
-							maxArea = area;
-						totalArea += area;
-						points.add(l);
-						areas.add(area);
-					}
+					areas.add(area);
+					if(area > maxArea)
+						maxArea = area;
+					totalArea += area;
 				}
 				
 				y = -1.0 * y;
 				l = new Point2D.Double(x, y);
 				
-				if(config.isReachableFromConfiguration(l))
+				reachable  = config.isReachableFromConfiguration(l);
+				area = LightConfiguration.marginalArea(l, currentLights);
+				if(config.isReachableFromConfiguration(l) && area > AREA_THRESHOLD)
 				{
-					area = LightConfiguration.marginalArea(l, currentLights);
-					if(area > AREA_THRESHOLD)
-					{
-						if(area > maxArea)
-							maxArea = area;
-						totalArea += area;
-						points.add(l);
-						areas.add(area);
-					}
+					areas.add(area);
+					if(area > maxArea)
+						maxArea = area;
+					totalArea += area;
 				}
 			}
 			
