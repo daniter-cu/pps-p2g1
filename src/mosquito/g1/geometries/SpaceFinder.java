@@ -60,6 +60,11 @@ public class SpaceFinder {
 	private void addNprune(OurLight l)
 	{
 		boolean added = false;
+		if(seeds.isEmpty())
+		{
+			seeds.add(l);
+			return;
+		}
 		for(OurLight seed : seeds)
 		{
 			if(added)
