@@ -248,7 +248,11 @@ public class LightConfiguration {
         return result;
     }
     
-    private static boolean areLightsConnected(Point2D light1, Point2D light2) {
+    private static boolean areConnected(Point2D light1, Point2D light2) {
+        if(light1.distance(light2) > LIGHT_RADIUS) {
+            return false;
+        }
+        
         Line2D connection = new Line2D.Double(light1, light2);
         Set<Line2D> walls = wallsOverlapping(light1);
         walls.addAll(wallsOverlapping(light2));
