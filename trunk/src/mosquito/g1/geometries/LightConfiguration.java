@@ -9,14 +9,15 @@ import mosquito.sim.Light;
 
 public class LightConfiguration {
 	public static final int GAP = 5;
-	public static final int ON = 20;
+	public static final int ON = 23;
 	public static final int CYCLE = (ON * 2) + GAP;
-	public static final int START1 = 0;
-	public static final int START2 = (START1 + ON + GAP) % CYCLE;
-	public static final int START3 = (START2 + ON + GAP) % CYCLE;
-	public static final int START4 = (START3 + ON + GAP) % CYCLE;
-	public static final int START5 = (START4 + ON + GAP) % CYCLE;
-	public static final int START6 = (START5 + ON + GAP) % CYCLE;
+	public static int START3 = 0;
+	public static int START2 = (START3 + ON) % CYCLE;
+	public static int START1 = (START2 + ON) % CYCLE;
+	
+	public static int START4 = (START3 + ON + GAP) % CYCLE;
+	public static int START5 = (START4 + ON + GAP) % CYCLE;
+	public static int START6 = (START5 + ON + GAP) % CYCLE;
 	
     public static int LIGHT_RADIUS = 20;
     public static int BOARD_DIMENSION = 100;
@@ -116,6 +117,21 @@ public class LightConfiguration {
     
     private void createLights(int[] depths)
 	{
+    	int max = 0;
+    	for(int j : depths)
+    		if( j > max )
+    			max = j;
+    	
+    	if(max == 1)
+    	{
+    		START1 = 0;
+    	}
+    	if(max == 2)
+    	{
+    		START2 = 0;
+    		START1 = (START2 + ON) % CYCLE;
+    	}
+    	
 		lights = new HashSet<Light>();
 		Light l;
 		for(int i=0; i<depths.length; i++)
