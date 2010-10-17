@@ -8,9 +8,9 @@ import mosquito.sim.Collector;
 import mosquito.sim.Light;
 
 public class LightConfiguration {
-	public static final int GAP = 5;
-	public static final int ON = 23;
-	public static final int CYCLE = (ON * 2) + GAP;
+	public static int GAP = 5;
+	public static int ON = 23;
+	public static int CYCLE = (ON * 2) + GAP;
 	public static int START3 = 0;
 	public static int START2 = (START3 + ON) % CYCLE;
 	public static int START1 = (START2 + ON) % CYCLE;
