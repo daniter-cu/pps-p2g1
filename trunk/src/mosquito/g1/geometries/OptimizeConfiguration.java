@@ -14,6 +14,14 @@ public class OptimizeConfiguration {
 	private final int MAX_ITERATIONS = 50;
 	private final int MAX_CONFIGS = 10;
 
+	private LightConfiguration config;
+	private List<Point2D> currentLights;
+	private LinkedList<Point2D> points;
+	LinkedList<Double> areas;
+	Point2D l;
+	double x, y, area, totalArea;
+	boolean reachable;
+	
 	public OptimizeConfiguration(LinkedList<Point2D> seedLights, int numLights)
 	{
 		this.seedLights = seedLights;
@@ -68,21 +76,16 @@ public class OptimizeConfiguration {
 	//need to add uniqueness check
 	//need to keep track of pruned points
 	private LightConfiguration findRandomConfiguration(LightConfiguration currentConfig) {
-		
+		long curTime = System.currentTimeMillis();
 		//instantiate local variables
-		LightConfiguration config = new LightConfiguration(currentConfig);
-		List<Point2D> currentLights;
-		LinkedList<Point2D> points = new LinkedList<Point2D>();
-		LinkedList<Double> areas;
-		Point2D l;
-		double x, y, area=0, maxArea, totalArea;
-		boolean reachable;
+		config = new LightConfiguration(currentConfig);
+		currentLights = config.getLights();
+		points = new LinkedList<Point2D>();
 
 		//create a random configuration
 		for(int i=0; i<numLights-1; i++)
 		{
 			//reset local variables
-			currentLights = config.getLights();
 			totalArea = 0;
 			areas = new LinkedList<Double>();
 			
@@ -111,26 +114,12 @@ public class OptimizeConfiguration {
 			x = centerX - radius;
 			y = centerY;
 			l = new Point2D.Double(x, y);
-			reachable  = config.isReachableFromConfiguration(l);
-			area = LightConfiguration.marginalArea(l, currentLights);
-			if(reachable && area > AREA_THRESHOLD && !points.contains(l))
-			{
-				points.add(l);
-				areas.add(area);
-				totalArea += area;
-			}
+			addIfValid(x, y, l);
 				
 			//add rightmost point to potentials
 			x = centerX + radius;
 			l = new Point2D.Double(x, y);
-			reachable  = config.isReachableFromConfiguration(l);
-			area = LightConfiguration.marginalArea(l, currentLights);
-			if(reachable && area > AREA_THRESHOLD && !points.contains(l))
-			{
-				points.add(l);
-				areas.add(area);
-				totalArea += area;
-			}
+			addIfValid(x, y, l);
 			
 			//add all central points to potentials
 			double increment = radius / 9.0;
@@ -140,50 +129,70 @@ public class OptimizeConfiguration {
 				y = getY(x, centerX, centerY, false);
 				l = new Point2D.Double(x, y);
 				
-				reachable = config.isReachableFromConfiguration(l);
-				area = LightConfiguration.marginalArea(l, currentLights);
-				if(reachable && area > AREA_THRESHOLD && !points.contains(l))
-				{
-					points.add(l);
-					areas.add(area);
-					totalArea += area;
-				}
+				addIfValid(x, y, l);
 				
 				y = getY(x, centerX, centerY, true);
 				l = new Point2D.Double(x, y);
 				
-				reachable  = config.isReachableFromConfiguration(l);
-				area = LightConfiguration.marginalArea(l, currentLights);
-				if(reachable && area > AREA_THRESHOLD && !points.contains(l))
-				{
-					points.add(l);
-					areas.add(area);
-					totalArea += area;
-				}
+				addIfValid(x, y, l);
 			}
 			
 			//weight by marginal area and choose a random point for light placement
 			int next = (int) (Math.random() * totalArea);
 			ListIterator<Double> itr = areas.listIterator();
 			ListIterator<Point2D> litr = points.listIterator();
-			Point2D curLight = litr.next();
-			double curArea = itr.next();
+			//Point2D curLight = litr.next();
+			//double curArea = itr.next();
 			
+			if(areas.size() != points.size())
+			{
+				System.err.println("areas and points unequal!");
+			}
 			//System.err.println("total area: " + totalArea + " next:" + next);
 			//System.err.println("list sizes:" + areas.size() + " " + points.size());
 			
-			for(double j=curArea; j<next; j += curArea)
+//			for(double j=curArea; j<next; j += curArea)
+//			{
+//					curArea = itr.next();
+//					curLight = litr.next();
+//			}
+			
+			Point2D curLight;
+			double curArea;
+			double maxArea = 0;
+			Point2D maxLight = new Point2D.Double();
+			while(itr.hasNext())
 			{
-					curArea = itr.next();
-					curLight = litr.next();
+				curArea = itr.next();
+				curLight = litr.next();
+				if(curArea > maxArea)
+				{
+					maxArea = curArea;
+					maxLight = curLight;
+				}
 			}
 			
 			//add chosen light to the configuration and remove it from potentials 
-			config.addLight(curLight);
-			litr.remove();
+			config.addLight(maxLight);
+			//litr.remove();
+			points.remove(maxLight);
 		}
 		
+		System.out.println(System.currentTimeMillis() - curTime);
 		return config;
+	}
+	
+	private void addIfValid(double x, double y, Point2D l)
+	{
+		reachable = config.isReachableFromConfiguration(l);
+		
+		area = LightConfiguration.marginalArea(l, currentLights);
+		if(reachable && area > AREA_THRESHOLD && !points.contains(l))
+		{
+			points.add(l);
+			areas.add(area);
+			totalArea += area;
+		}
 	}
 	
 	//calculate the positive y value on the circle, given the x
