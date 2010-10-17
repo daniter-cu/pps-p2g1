@@ -178,7 +178,7 @@ public class OptimizeConfiguration {
 			points.remove(maxLight);
 		}
 		
-		System.out.println(System.currentTimeMillis() - curTime);
+		//System.out.println(System.currentTimeMillis() - curTime);
 		return config;
 	}
 	

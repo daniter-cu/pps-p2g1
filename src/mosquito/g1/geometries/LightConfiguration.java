@@ -192,7 +192,7 @@ public class LightConfiguration {
                 Point2D light1 = lightSet.get(i);
                 Point2D light2 = lightSet.get(j);
                 if(light1.distance(light2) <= LIGHT_RADIUS + 1) {
-                    System.out.println("Link found between lights "+i+" and "+j);
+                    //System.out.println("Link found between lights "+i+" and "+j);
                     result.get(i).add(j);
                     result.get(j).add(i);
                 }
@@ -285,9 +285,9 @@ public class LightConfiguration {
     }
     
     public static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore) {
-        System.out.println("The new light ["+newLight.getX()+", "+newLight.getY()+"]");
+        //System.out.println("The new light ["+newLight.getX()+", "+newLight.getY()+"]");
         for(Point2D light : lightsToIgnore) {
-            System.out.println("The old light ["+light.getX()+", "+light.getY()+"]");
+            //System.out.println("The old light ["+light.getX()+", "+light.getY()+"]");
         }
         
         double area = 0.;
@@ -461,6 +461,6 @@ public class LightConfiguration {
         lights.remove(0);
         LightConfiguration.clearBoard();
         //LightConfiguration.addWalls(board);
-        System.out.println(LightConfiguration.marginalArea(center, lights));
+        //System.out.println(LightConfiguration.marginalArea(center, lights));
     }
 }
