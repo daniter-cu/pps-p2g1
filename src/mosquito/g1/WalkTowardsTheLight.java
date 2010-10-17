@@ -40,7 +40,7 @@ public class WalkTowardsTheLight extends Player {
 	
 	@Override
 	public String getName() {
-		return "Walk Towards The Light 0";
+		return "Walk Towards The Light";
 	}
 	
 	@Override
