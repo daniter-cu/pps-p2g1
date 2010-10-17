@@ -84,8 +84,8 @@ public class WalkTowardsTheLight extends Player {
 
 	@Override
 	public Set<Light> getLights() {
-//		if(walls.size() == 0)
-//			return getCentralShape(DISPLACEMENTS[numLights - 1], 2);
+		if(walls.size() == 0)
+			return getCentralShape(DISPLACEMENTS[numLights - 1], 2);
 		
 		if(isSimulated)
 			return simLights;
@@ -151,6 +151,7 @@ public class WalkTowardsTheLight extends Player {
 		HashSet<Light> ret = new HashSet<Light>();
 		
 		Light l1 = new Light(baseX,baseY,1,1,0);
+		collector = new Collector(50.5, 50);
 		
 		Light l2 = new Light(baseX - displacement,baseY + displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
 		Light l3 = new Light(baseX + displacement,baseY - displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
@@ -190,6 +191,7 @@ public class WalkTowardsTheLight extends Player {
 		{
 			ret.add(l14);
 			ret.add(l15);
+			collector = new Collector(50, 50);
 		}
 		
 		if(numLights > 8)

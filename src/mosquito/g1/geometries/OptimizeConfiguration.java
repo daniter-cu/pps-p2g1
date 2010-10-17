@@ -11,8 +11,8 @@ public class OptimizeConfiguration {
 	private int numLights;
 	private double radius = 20;
 	private final double AREA_THRESHOLD = 0;
-	private final int MAX_ITERATIONS = 50;
-	private final int MAX_CONFIGS = 10;
+	private final int MAX_ITERATIONS = 100;
+	private final int MAX_CONFIGS = 1;
 
 	private LightConfiguration config;
 	private List<Point2D> currentLights;
