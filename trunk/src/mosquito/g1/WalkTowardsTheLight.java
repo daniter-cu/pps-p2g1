@@ -83,7 +83,10 @@ public class WalkTowardsTheLight extends Player {
         LightConfiguration.addWalls(this.walls);
         
         if(walls.size() == 0)
+        {
 			lights = getCentralShape(DISPLACEMENTS[numLights - 1], 2);
+			return;
+        }
 		
 		SpaceFinder finder = new SpaceFinder(this.walls);
 		LinkedList<Point2D> seeds = finder.getSeeds();
