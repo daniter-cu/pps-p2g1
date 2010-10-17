@@ -185,7 +185,6 @@ public class OptimizeConfiguration {
 	private void addIfValid(double x, double y, Point2D l)
 	{
 		reachable = config.isReachableFromConfiguration(l);
-		
 		area = LightConfiguration.marginalArea(l, currentLights);
 		if(reachable && area > AREA_THRESHOLD && !points.contains(l))
 		{

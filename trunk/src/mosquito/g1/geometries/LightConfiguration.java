@@ -8,8 +8,8 @@ import mosquito.sim.Collector;
 import mosquito.sim.Light;
 
 public class LightConfiguration {
-	public static final int GAP = 4;
-	public static final int ON = 17;
+	public static final int GAP = 5;
+	public static final int ON = 20;
 	public static final int CYCLE = (ON * 2) + GAP;
 	public static final int START1 = 0;
 	public static final int START2 = (START1 + ON + GAP) % CYCLE;
@@ -54,9 +54,9 @@ public class LightConfiguration {
     }
     
     public static void addWalls(Set<Line2D> board) {
-        if(board == null) {
+        //if(board == null) {
             LightConfiguration.board = board;
-        }
+        //}
     }
     
     public static void clearBoard() {
@@ -410,7 +410,7 @@ public class LightConfiguration {
      * @return Whether the wall might enter the light's perimeter.
      */
     private static boolean wallShadows(Point2D light, Line2D wall) {
-        return (wall.ptLineDist(light) < LIGHT_RADIUS);
+        return (wall.ptSegDist(light) < LIGHT_RADIUS);
     }
     
     /**
