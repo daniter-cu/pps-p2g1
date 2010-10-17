@@ -127,6 +127,74 @@ public class LightConfiguration {
 			{
 				l = new Light(cur.getX(), cur.getY(), 1, 1, 0);
 				c = new Collector(cur.getX() - 0.5, cur.getY());
+				boolean intersects = false;
+				for(Line2D wall : board)
+					if(c.intersects(wall))
+						intersects = true;
+				
+				if(intersects)
+				{
+					intersects = false;
+					c = new Collector(cur.getX() + 0.5, cur.getY());
+					for(Line2D wall : board)
+						if(c.intersects(wall))
+							intersects = true;
+				}
+				
+				if(intersects)
+				{
+					intersects = false;
+					c = new Collector(cur.getX(), cur.getY() + 0.5);
+					for(Line2D wall : board)
+						if(c.intersects(wall))
+							intersects = true;
+				}
+				
+				if(intersects)
+				{
+					intersects = false;
+					c = new Collector(cur.getX(), cur.getY() - 0.5);
+					for(Line2D wall : board)
+						if(c.intersects(wall))
+							intersects = true;
+				}
+				
+				if(intersects)
+				{
+					intersects = false;
+					c = new Collector(cur.getX() + 1, cur.getY());
+					for(Line2D wall : board)
+						if(c.intersects(wall))
+							intersects = true;
+				}
+				
+				if(intersects)
+				{
+					intersects = false;
+					c = new Collector(cur.getX() - 1, cur.getY());
+					for(Line2D wall : board)
+						if(c.intersects(wall))
+							intersects = true;
+				}
+				
+				if(intersects)
+				{
+					intersects = false;
+					c = new Collector(cur.getX(), cur.getY() - 1);
+					for(Line2D wall : board)
+						if(c.intersects(wall))
+							intersects = true;
+				}
+				
+				if(intersects)
+				{
+					intersects = false;
+					c = new Collector(cur.getX(), cur.getY() + 1);
+					for(Line2D wall : board)
+						if(c.intersects(wall))
+							intersects = true;
+				}
+					
 			}
 			else
 			{
