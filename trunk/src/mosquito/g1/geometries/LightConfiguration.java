@@ -8,16 +8,16 @@ import mosquito.sim.Collector;
 import mosquito.sim.Light;
 
 public class LightConfiguration {
-	public static final int GAP = 5;
-	public static final int ON = 23;
-	public static final int CYCLE = (ON * 2) + GAP;
-	public static final int START3 = 0;
-	public static final int START2 = (START3 + ON) % CYCLE;
-	public static final int START1 = (START2 + ON) % CYCLE;
+	public static int GAP = 5;
+	public static int ON = 23;
+	public static int CYCLE = (ON * 2) + GAP;
+	public static int START3 = 0;
+	public static int START2 = (START3 + ON) % CYCLE;
+	public static int START1 = (START2 + ON) % CYCLE;
 	
-	public static final int START4 = (START3 + ON + GAP) % CYCLE;
-	public static final int START5 = (START4 + ON + GAP) % CYCLE;
-	public static final int START6 = (START5 + ON + GAP) % CYCLE;
+	public static int START4 = (START3 + ON + GAP) % CYCLE;
+	public static int START5 = (START4 + ON + GAP) % CYCLE;
+	public static int START6 = (START5 + ON + GAP) % CYCLE;
 	
     public static final int LIGHT_RADIUS = 20;
     public static final int BOARD_DIMENSION = 100;
