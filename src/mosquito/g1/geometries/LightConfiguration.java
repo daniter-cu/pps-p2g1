@@ -8,21 +8,21 @@ import mosquito.sim.Collector;
 import mosquito.sim.Light;
 
 public class LightConfiguration {
-	public static int GAP = 5;
-	public static int ON = 23;
-	public static int CYCLE = (ON * 2) + GAP;
-	public static int START3 = 0;
-	public static int START2 = (START3 + ON) % CYCLE;
-	public static int START1 = (START2 + ON) % CYCLE;
+	public static final int GAP = 5;
+	public static final int ON = 23;
+	public static final int CYCLE = (ON * 2) + GAP;
+	public static final int START3 = 0;
+	public static final int START2 = (START3 + ON) % CYCLE;
+	public static final int START1 = (START2 + ON) % CYCLE;
 	
-	public static int START4 = (START3 + ON + GAP) % CYCLE;
-	public static int START5 = (START4 + ON + GAP) % CYCLE;
-	public static int START6 = (START5 + ON + GAP) % CYCLE;
+	public static final int START4 = (START3 + ON + GAP) % CYCLE;
+	public static final int START5 = (START4 + ON + GAP) % CYCLE;
+	public static final int START6 = (START5 + ON + GAP) % CYCLE;
 	
-    public static int LIGHT_RADIUS = 20;
-    public static int BOARD_DIMENSION = 100;
-    public static double AREA_RESOLUTION = 1.0;
-    public static double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
+    public static final int LIGHT_RADIUS = 20;
+    public static final int BOARD_DIMENSION = 100;
+    public static final double AREA_RESOLUTION = 1.0;
+    public static final double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
     
     private ArrayList<Point2D> lightSet;
     private int centerLightIndex;
@@ -122,14 +122,14 @@ public class LightConfiguration {
     		if( j > max )
     			max = j;
     	
-    	if(max == 1)
-    	{
-    		START1 = 0;
-    	}
-    	if(max == 2)
-    	{
-    		START2 = 0;
-    		START1 = (START2 + ON) % CYCLE;
+    	int adjStart1 = START1;
+    	int adjStart2 = START2;
+    	
+    	if(max == 1) {
+    		adjStart1 = START3;
+    	} else if(max == 2) {
+    		adjStart2 = START3;
+    		adjStart1 = (adjStart2 + ON) % CYCLE;
     	}
     	
 		lights = new HashSet<Light>();
@@ -217,10 +217,10 @@ public class LightConfiguration {
 				switch(depths[i])
 				{
 				case 1:
-					start = START1;
+					start = adjStart1;
 					break;
 				case 2:
-					start = START2;
+					start = adjStart2;
 					break;
 				case 3:
 					start = START3;
