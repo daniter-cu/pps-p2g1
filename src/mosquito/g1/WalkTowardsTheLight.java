@@ -113,10 +113,8 @@ public class WalkTowardsTheLight extends Player {
 		System.out.println("collector: " + collector.getX() + " " + collector.getY());
 
 	}
-
 	
-	private LightConfiguration getBestConfig(ArrayList<LightConfiguration> lcs)
-	{
+	private LightConfiguration getBestConfig(ArrayList<LightConfiguration> lcs) {
 		int bestRound = 0;
 		int temp = 0;
 		int bestOn = 0;
