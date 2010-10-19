@@ -10,11 +10,11 @@ public class OptimizeConfiguration {
 	private LinkedList<Point2D> seedLights;
 	private LinkedList<LightConfiguration> randConfigs = new LinkedList<LightConfiguration>();
 	private int numLights;
-	private final double RADIUS = 20;
-	private final double AREA_THRESHOLD = 0;
-	private final double EDGE_POINT_RESOLUTION = 36.0;
-	private final int MAX_ITERATIONS = 100;
-	private final int MAX_CONFIGS = 1;
+	private static final double RADIUS = 20;
+	private static final double AREA_THRESHOLD = 0;
+	private static final double EDGE_POINT_RESOLUTION = 36.0;
+	private static final int MAX_ITERATIONS = 100;
+	private static final int MAX_CONFIGS = 1;
 
 	private LightConfiguration config;
 	private List<Point2D> currentLights;
