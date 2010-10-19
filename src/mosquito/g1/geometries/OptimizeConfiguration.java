@@ -12,13 +12,13 @@ public class OptimizeConfiguration {
 	private int numLights;
 	private final double RADIUS = 20;
 	private final double AREA_THRESHOLD = 0;
+	private final double EDGE_POINT_RESOLUTION = 9.0;
 	private final int MAX_ITERATIONS = 100;
 	private final int MAX_CONFIGS = 1;
 
 	private LightConfiguration config;
 	private List<Point2D> currentLights;
 	private LinkedList<LightWithArea> points;
-	Point2D l;
 	double x, y, area, totalArea;
 	boolean reachable;
 	
@@ -198,36 +198,41 @@ public class OptimizeConfiguration {
 	
 	private void addAllPointsAroundCircle(int index, int lightsAdded, double currentRadius)
 	{
-		//add leftmost point to potentials
 		Point2D newestLight = currentLights.get(index);
 		double centerX = newestLight.getX();
 		double centerY = newestLight.getY();
 		
-		x = centerX - currentRadius;
-		y = centerY;
-		l = new Point2D.Double(x, y);
-		addIfValid(x, y, l);
+		//add all circumferential points to potentials
+		double increment = 360 / EDGE_POINT_RESOLUTION;
+		int incrementsPossible = (int) (90 / increment);
+		Point2D l;
+		double angle;
+		for(int j = -incrementsPossible; j <= incrementsPossible; j++) {
+		    angle = j * increment;
+		    
+			l = getPointFromCenter(centerX, centerY, angle, currentRadius, true);
+			addIfValid(l);
 			
-		//add rightmost point to potentials
-		x = centerX + currentRadius;
-		l = new Point2D.Double(x, y);
-		addIfValid(x, y, l);
-		
-		//add all central points to potentials
-		double increment = currentRadius / 9.0;
-		for(int j = -8; j <= 8; j++)
-		{
-			x = centerX + ((double)j * increment);
-			y = getY(x, centerX, centerY, false);
-			l = new Point2D.Double(x, y);
-			
-			addIfValid(x, y, l);
-			
-			y = getY(x, centerX, centerY, true);
-			l = new Point2D.Double(x, y);
-			
-			addIfValid(x, y, l);
+			l = getPointFromCenter(centerX, centerY, angle, currentRadius, false);
+            addIfValid(l);
 		}
+	}
+	
+	/**
+	 * Gets a point from a center given angle and distance
+	 * @param centerX The x of the center
+	 * @param centerY The y of the center
+	 * @param degrees The degrees (between -90 and 90) to travel from the x axis
+	 * @param radius How far to move along that angle
+	 * @param toTheLeft Whether to move left or right of the center
+	 * @return The point computed from these parameters
+	 */
+	private Point2D getPointFromCenter(double centerX, double centerY, double degrees, double radius, boolean toTheLeft) {
+	    x = centerX + (toTheLeft ? -1 : 1) * radius * Math.cos(Math.toRadians(Math.abs(degrees)));
+	    
+	    Point2D result = new Point2D.Double(x, getY(x, centerX, centerY, radius, (degrees < 0)));
+	    
+	    return result;
 	}
 	
 	private void fillWithDummies(int lightsAdded)
@@ -236,7 +241,7 @@ public class OptimizeConfiguration {
 			config.addLight(new Point2D.Double(-1, -1));
 	}
 	
-	private void addIfValid(double x, double y, Point2D l)
+	private void addIfValid(Point2D l)
 	{
 		reachable = config.isReachableFromConfiguration(l);
 		area = LightConfiguration.marginalArea(l, currentLights);
@@ -250,8 +255,13 @@ public class OptimizeConfiguration {
 	//calculate the positive y value on the circle, given the x
 	private double getY(double x, double centerX, double centerY, boolean negate)
 	{
-		return (negate ? -1 : 1) * Math.sqrt(Math.pow(RADIUS, 2) - Math.pow(x - centerX, 2)) + centerY;
+		return getY(x, centerX, centerY, RADIUS, negate);
 	}
+	
+	private double getY(double x, double centerX, double centerY, double radius, boolean negate)
+    {
+        return (negate ? -1 : 1) * Math.sqrt(Math.pow(radius, 2) - Math.pow(x - centerX, 2)) + centerY;
+    }
 
 	private class LightWithArea implements Comparable<LightWithArea>
 	{
