@@ -17,8 +17,7 @@ public class OptimizeConfiguration {
 
 	private LightConfiguration config;
 	private List<Point2D> currentLights;
-	private LinkedList<Point2D> points;
-	LinkedList<Double> areas;
+	private LinkedList<LightWithArea> points;
 	Point2D l;
 	double x, y, area, totalArea;
 	boolean reachable;
@@ -98,78 +97,44 @@ public class OptimizeConfiguration {
 		//instantiate local variables
 		config = new LightConfiguration(currentConfig);
 		currentLights = config.getLights();
-		points = new LinkedList<Point2D>();
+		points = new LinkedList<LightWithArea>();
 		double currentRadius = RADIUS;
 
 		//create a random configuration
 		int lightsAdded = 1;
+		int lastLightsAdded = 1;
 		while(lightsAdded < numLights)
 		{
 			//reset local variables
 			totalArea = 0;
-			areas = new LinkedList<Double>();
 			
-			//recalculate marginal area for all seen points
-			ListIterator<Point2D> it = points.listIterator();
-			while(it.hasNext())
+			if(lastLightsAdded != lightsAdded)
 			{
-				Point2D p = it.next();
-				area = LightConfiguration.marginalArea(p, currentLights);
-				if(area < AREA_THRESHOLD)
+				//recalculate marginal area for all seen points
+				ListIterator<LightWithArea> it = points.listIterator();
+				while(it.hasNext())
 				{
-					it.remove();
-				}
-				else
-				{
-					areas.add(area);
-					totalArea += area;
+					LightWithArea current = it.next();
+					area = LightConfiguration.marginalArea(current.light, currentLights);
+					if(area < AREA_THRESHOLD)
+					{
+						it.remove();
+					}
+					else
+					{
+						current.marginalArea = area;
+						totalArea += area;
+					}
 				}
 			}
 			
-			//add leftmost point to potentials
-			Point2D newestLight = currentLights.get(lightsAdded - 1);
-			double centerX = newestLight.getX();
-			double centerY = newestLight.getY();
-			
-			x = centerX - currentRadius;
-			y = centerY;
-			l = new Point2D.Double(x, y);
-			addIfValid(x, y, l);
-				
-			//add rightmost point to potentials
-			x = centerX + currentRadius;
-			l = new Point2D.Double(x, y);
-			addIfValid(x, y, l);
-			
-			//add all central points to potentials
-			double increment = currentRadius / 9.0;
-			for(int j = -8; j <= 8; j++)
-			{
-				x = centerX + ((double)j * increment);
-				y = getY(x, centerX, centerY, false);
-				l = new Point2D.Double(x, y);
-				
-				addIfValid(x, y, l);
-				
-				y = getY(x, centerX, centerY, true);
-				l = new Point2D.Double(x, y);
-				
-				addIfValid(x, y, l);
-			}
+			addAllPointsAroundCircle(lightsAdded - 1, lightsAdded, currentRadius);
 			
 			//weight by marginal area and choose a random point for light placement
 			int next = (int) (Math.random() * totalArea);
-			ListIterator<Double> itr = areas.listIterator();
-			ListIterator<Point2D> litr = points.listIterator();
+			ListIterator<LightWithArea> litr = points.listIterator();
 			//Point2D curLight = litr.next();
 			//double curArea = itr.next();
-			
-			if(areas.size() != points.size())
-			{
-				System.err.println("areas and points unequal!");
-			}
-			//System.err.println("total area: " + totalArea + " next:" + next);
-			//System.err.println("list sizes:" + areas.size() + " " + points.size());
 			
 //			for(double j=curArea; j<next; j += curArea)
 //			{
@@ -177,23 +142,22 @@ public class OptimizeConfiguration {
 //					curLight = litr.next();
 //			}
 			
-			Point2D curLight;
-			double curArea;
-			double maxArea = 0;
-			Point2D maxLight = new Point2D.Double();
-			while(itr.hasNext())
+			LightWithArea curLight;
+			LightWithArea maxLight = new LightWithArea();
+			while(litr.hasNext())
 			{
-				curArea = itr.next();
 				curLight = litr.next();
-				if(curArea > maxArea)
+				
+				if(maxLight.marginalArea == -1)
+					maxLight = curLight;
+				else if(curLight.marginalArea > maxLight.marginalArea)
 				{
-					maxArea = curArea;
 					maxLight = curLight;
 				}
 			}
 			
 			//check that a usable light position was found
-			if(maxArea == 0)
+			if(maxLight.marginalArea < 1)
 			{
 				currentRadius--;
 				if(currentRadius < 1)
@@ -206,13 +170,18 @@ public class OptimizeConfiguration {
 					else
 						return null;
 				}
+				else
+				{
+					for(int i=0; i<currentLights.size() - 1; i++)
+						addAllPointsAroundCircle(i, lightsAdded, currentRadius);
+				}
 			}
 			else
 			{
 				//add chosen light to the configuration and remove it from potentials 
 				lightsAdded++;
 				currentRadius = RADIUS;
-				config.addLight(maxLight);
+				config.addLight(maxLight.light);
 				points.remove(maxLight);
 				
 				if(config.areaCovered() > 5000)
@@ -227,6 +196,40 @@ public class OptimizeConfiguration {
 		return config;
 	}
 	
+	private void addAllPointsAroundCircle(int index, int lightsAdded, double currentRadius)
+	{
+		//add leftmost point to potentials
+		Point2D newestLight = currentLights.get(index);
+		double centerX = newestLight.getX();
+		double centerY = newestLight.getY();
+		
+		x = centerX - currentRadius;
+		y = centerY;
+		l = new Point2D.Double(x, y);
+		addIfValid(x, y, l);
+			
+		//add rightmost point to potentials
+		x = centerX + currentRadius;
+		l = new Point2D.Double(x, y);
+		addIfValid(x, y, l);
+		
+		//add all central points to potentials
+		double increment = currentRadius / 9.0;
+		for(int j = -8; j <= 8; j++)
+		{
+			x = centerX + ((double)j * increment);
+			y = getY(x, centerX, centerY, false);
+			l = new Point2D.Double(x, y);
+			
+			addIfValid(x, y, l);
+			
+			y = getY(x, centerX, centerY, true);
+			l = new Point2D.Double(x, y);
+			
+			addIfValid(x, y, l);
+		}
+	}
+	
 	private void fillWithDummies(int lightsAdded)
 	{
 		for(int i=lightsAdded; i<numLights; i++)
@@ -239,8 +242,7 @@ public class OptimizeConfiguration {
 		area = LightConfiguration.marginalArea(l, currentLights);
 		if(reachable && area > AREA_THRESHOLD && !points.contains(l))
 		{
-			points.add(l);
-			areas.add(area);
+			points.add(new LightWithArea(l, area));
 			totalArea += area;
 		}
 	}
@@ -251,4 +253,31 @@ public class OptimizeConfiguration {
 		return (negate ? -1 : 1) * Math.sqrt(Math.pow(RADIUS, 2) - Math.pow(x - centerX, 2)) + centerY;
 	}
 
+	private class LightWithArea implements Comparable<LightWithArea>
+	{
+		public double marginalArea;
+		public Point2D light;
+		
+		public LightWithArea()
+		{
+			marginalArea = -1;
+		}
+		
+		public LightWithArea(Point2D light, double area)
+		{
+			this.light = light;
+			this.marginalArea = area;
+		}
+
+		public int compareTo(LightWithArea other) {
+			if(other.light.getX() == this.light.getX() 
+					&& other.light.getY() == this.light.getY() 
+					&& other.marginalArea == this.marginalArea)
+				return 0;
+			else if(other.marginalArea < this.marginalArea)
+				return 1;
+			else
+				return -1;
+		}
+	}
 }
