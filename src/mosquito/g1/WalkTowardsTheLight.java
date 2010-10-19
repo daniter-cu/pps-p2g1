@@ -114,11 +114,10 @@ public class WalkTowardsTheLight extends Player {
 	
 	private LightConfiguration getBestConfig(ArrayList<LightConfiguration> lcs)
 	{
-		
-		int bestround = 0;
+		int bestRound = 0;
 		int temp = 0;
-		int beston = 0;
-		int bestgap = 0;
+		int bestOn = 0;
+		int bestGap = 0;
 		LightConfiguration best = null;
 		for(LightConfiguration lc : lcs)
 		{
@@ -126,21 +125,19 @@ public class WalkTowardsTheLight extends Player {
 			{
 				for(int gap = 3; gap < 9; gap++)
 				{
-					lc.ON = on;
-					lc.GAP = gap;
+				    lc.setOnAndGap(on, gap);
 					temp = runSimulator(lc.getActualLights(), lc.getCollector());
-					if(temp > bestround)
+					if(temp > bestRound)
 					{
-						bestround = temp;
+						bestRound = temp;
 						best = lc;
-						beston = on;
-						bestgap = gap;
+						bestOn = on;
+						bestGap = gap;
 					}
 				}
 			}
 		}
-		best.ON = beston;
-		best.GAP = bestgap;
+		best.setOnAndGap(bestOn, bestGap);
 		return best;
 	}
 	

@@ -8,10 +8,7 @@ import mosquito.sim.Collector;
 import mosquito.sim.Light;
 
 public class LightConfiguration {
-	public static int GAP = 5;
-	public static int ON = 23;
-	public static int CYCLE = (ON * 2) + GAP;
-	public static int[] START = new int[100];
+	public static final int[] START = new int[100];
 	
     public static final int LIGHT_RADIUS = 20;
     public static final int BOARD_DIMENSION = 100;
@@ -19,6 +16,10 @@ public class LightConfiguration {
     public static final double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
     
     public static final double COLLECTOR_OFFSET = 0.5;
+    
+    private int cycleGap = 5;
+    private int cycleOn = 23;
+    private int cycleLength = (cycleOn * 2) + cycleGap;
     
     private ArrayList<Point2D> lightSet;
     private int centerLightIndex;
@@ -48,6 +49,12 @@ public class LightConfiguration {
     public void addLight(Point2D light) {
         areaCovered += marginalArea(light, lightSet);
         lightSet.add(light);
+    }
+    
+    public void setOnAndGap(int on, int gap) {
+        this.cycleOn = on;
+        this.cycleGap = gap;
+        this.cycleLength = (cycleOn * 2) + cycleGap;
     }
     
     public static void addWalls(Set<Line2D> board) {
@@ -222,7 +229,7 @@ public class LightConfiguration {
 				int startIndex = depths[i];
 				if(startIndex > 14)
 					startIndex = 14;
-				l = new Light(cur.getX(), cur.getY(), CYCLE, ON, START[startIndex]);
+				l = new Light(cur.getX(), cur.getY(), cycleLength, cycleOn, START[startIndex]);
 			}
 			
 			lights.add(l);
@@ -241,18 +248,18 @@ public class LightConfiguration {
     	else if(max == 2)
     	{
     		START[2] = 0;
-    		START[1] = (START[2] + ON) % CYCLE;
+    		START[1] = (START[2] + cycleOn) % cycleLength;
     	}
     	else if(max == 3)
     	{
     		START[3] = 0;
-    		START[2] = (START[3] + ON) % CYCLE;
-    		START[1] = (START[2] + ON) % CYCLE;
+    		START[2] = (START[3] + cycleOn) % cycleLength;
+    		START[1] = (START[2] + cycleOn) % cycleLength;
     	}
     	
     	for(int i= max + 1; i<START.length; i++)
     	{
-    		START[i] = (START[i-1] + ON + GAP) % CYCLE;
+    		START[i] = (START[i-1] + cycleOn + cycleGap) % cycleLength;
     	}
     		
 	}
