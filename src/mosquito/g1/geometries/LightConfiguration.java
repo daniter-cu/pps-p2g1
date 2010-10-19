@@ -18,6 +18,8 @@ public class LightConfiguration {
     public static final double AREA_RESOLUTION = 1.0;
     public static final double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
     
+    public static final double COLLECTOR_OFFSET = 0.5;
+    
     private ArrayList<Point2D> lightSet;
     private int centerLightIndex;
     private static Set<Line2D> board;
@@ -132,7 +134,7 @@ public class LightConfiguration {
 			if(depths[i] == 0)
 			{
 				l = new Light(cur.getX(), cur.getY(), 1, 1, START[0]);
-				c = new Collector(cur.getX() - 0.5, cur.getY());
+				c = new Collector(cur.getX() - COLLECTOR_OFFSET, cur.getY());
 				
 				boolean intersects = false;
 				for(Line2D wall : board)
@@ -142,7 +144,7 @@ public class LightConfiguration {
 				if(intersects)
 				{
 					intersects = false;
-					c = new Collector(cur.getX() + 0.5, cur.getY());
+					c = new Collector(cur.getX() + COLLECTOR_OFFSET, cur.getY());
 					for(Line2D wall : board)
 						if(c.intersects(wall))
 							intersects = true;
@@ -151,7 +153,7 @@ public class LightConfiguration {
 				if(intersects)
 				{
 					intersects = false;
-					c = new Collector(cur.getX(), cur.getY() + 0.5);
+					c = new Collector(cur.getX(), cur.getY() + COLLECTOR_OFFSET);
 					for(Line2D wall : board)
 						if(c.intersects(wall))
 							intersects = true;
@@ -160,46 +162,54 @@ public class LightConfiguration {
 				if(intersects)
 				{
 					intersects = false;
-					c = new Collector(cur.getX(), cur.getY() - 0.5);
+					c = new Collector(cur.getX(), cur.getY() - COLLECTOR_OFFSET);
 					for(Line2D wall : board)
 						if(c.intersects(wall))
 							intersects = true;
 				}
 				
-				if(intersects)
+				double fix = .0001;
+				while(intersects)
 				{
-					intersects = false;
-					c = new Collector(cur.getX() + 1, cur.getY());
-					for(Line2D wall : board)
-						if(c.intersects(wall))
-							intersects = true;
-				}
-				
-				if(intersects)
-				{
-					intersects = false;
-					c = new Collector(cur.getX() - 1, cur.getY());
-					for(Line2D wall : board)
-						if(c.intersects(wall))
-							intersects = true;
-				}
-				
-				if(intersects)
-				{
-					intersects = false;
-					c = new Collector(cur.getX(), cur.getY() - 1);
-					for(Line2D wall : board)
-						if(c.intersects(wall))
-							intersects = true;
-				}
-				
-				if(intersects)
-				{
-					intersects = false;
-					c = new Collector(cur.getX(), cur.getY() + 1);
-					for(Line2D wall : board)
-						if(c.intersects(wall))
-							intersects = true;
+					if(intersects)
+					{
+						intersects = false;
+						c = new Collector(cur.getX() + (COLLECTOR_OFFSET + fix), cur.getY());
+						for(Line2D wall : board)
+							if(c.intersects(wall))
+								intersects = true;
+					}
+					
+					if(intersects)
+					{
+						intersects = false;
+						c = new Collector(cur.getX() - (COLLECTOR_OFFSET + fix), cur.getY());
+						for(Line2D wall : board)
+							if(c.intersects(wall))
+								intersects = true;
+					}
+					
+					if(intersects)
+					{
+						intersects = false;
+						c = new Collector(cur.getX(), cur.getY() - (COLLECTOR_OFFSET + fix));
+						for(Line2D wall : board)
+							if(c.intersects(wall))
+								intersects = true;
+					}
+					
+					if(intersects)
+					{
+						intersects = false;
+						c = new Collector(cur.getX(), cur.getY() + (COLLECTOR_OFFSET + fix));
+						for(Line2D wall : board)
+							if(c.intersects(wall))
+								intersects = true;
+					}
+					
+					if(intersects)
+						fix += .0001;
+					System.out.println("fix: " + fix);
 				}
 					
 			}

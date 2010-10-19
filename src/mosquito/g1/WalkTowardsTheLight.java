@@ -84,7 +84,7 @@ public class WalkTowardsTheLight extends Player {
         
         if(walls.size() == 0)
         {
-			lights = getCentralShape(DISPLACEMENTS[numLights - 1], 2);
+			lights = getCentralShape(DISPLACEMENTS[Math.min(numLights - 1, 9)], 2);
 			return;
         }
 		
@@ -106,6 +106,9 @@ public class WalkTowardsTheLight extends Player {
 		
 		collector = l.getCollector();
 		lights =  l.getActualLights();
+		
+		System.out.println("collector: " + collector.getX() + " " + collector.getY());
+
 	}
 
 	
