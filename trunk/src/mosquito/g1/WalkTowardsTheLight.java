@@ -31,7 +31,7 @@ public class WalkTowardsTheLight extends Player {
 	//private double BASE = 50;
 	private double baseX = 50;
 	private double baseY = 50;
-    private static double rounds;
+    private static int rounds;
 	private boolean [][] openGridSpots = new boolean[100][100];
 	private boolean isSimulated = false;
 	private Collector collector;
@@ -49,7 +49,7 @@ public class WalkTowardsTheLight extends Player {
 		this.numLights = NumLights;
 	}
 	
-	private double runSimulator(Set<Light> lights, Collector col)
+	private int runSimulator(Set<Light> lights, Collector col)
 	{
 		isSimulated = true;
 		simCollector = col;
@@ -112,9 +112,36 @@ public class WalkTowardsTheLight extends Player {
 	}
 
 	
-	private LightConfiguration getBestConfig(List<LightConfiguration> lcs)
+	private LightConfiguration getBestConfig(ArrayList<LightConfiguration> lcs)
 	{
-		return null;
+		
+		int bestround = 0;
+		int temp = 0;
+		int beston = 0;
+		int bestgap = 0;
+		LightConfiguration best = null;
+		for(LightConfiguration lc : lcs)
+		{
+			for(int on = 18; on < 30; on++)
+			{
+				for(int gap = 3; gap < 9; gap++)
+				{
+					lc.ON = on;
+					lc.GAP = gap;
+					temp = runSimulator(lc.getActualLights(), lc.getCollector());
+					if(temp > bestround)
+					{
+						bestround = temp;
+						best = lc;
+						beston = on;
+						bestgap = gap;
+					}
+				}
+			}
+		}
+		best.ON = beston;
+		best.GAP = bestgap;
+		return best;
 	}
 	
 	@Override
