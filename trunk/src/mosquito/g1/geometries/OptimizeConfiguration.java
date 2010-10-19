@@ -12,7 +12,7 @@ public class OptimizeConfiguration {
 	private int numLights;
 	private final double RADIUS = 20;
 	private final double AREA_THRESHOLD = 0;
-	private final double EDGE_POINT_RESOLUTION = 9.0;
+	private final double EDGE_POINT_RESOLUTION = 36.0;
 	private final int MAX_ITERATIONS = 100;
 	private final int MAX_CONFIGS = 1;
 
