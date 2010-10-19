@@ -1,13 +1,14 @@
 package mosquito.g1.geometries;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
 public class OptimizeConfiguration {
 	private LinkedList<Point2D> seedLights;
-	private LinkedList<LightConfiguration> randConfigs;
+	private LinkedList<LightConfiguration> randConfigs = new LinkedList<LightConfiguration>();
 	private int numLights;
 	private double radius = 20;
 	private final double AREA_THRESHOLD = 0;
@@ -71,6 +72,20 @@ public class OptimizeConfiguration {
 		}
 		
 		return randConfigs.getFirst();
+	}
+	
+	public List<LightConfiguration> calcOptimumConfigs()
+	{
+		if(randConfigs.size() == 0)
+			calcOptimumConfig();
+		List<LightConfiguration> bestConfigs = new ArrayList<LightConfiguration>();
+		ListIterator<LightConfiguration> itr = randConfigs.listIterator();
+		for(int i=0; i<10 && itr.hasNext(); i++)
+		{
+			bestConfigs.add(itr.next());
+		}
+		
+		return bestConfigs;
 	}
 
 	//need to add uniqueness check
