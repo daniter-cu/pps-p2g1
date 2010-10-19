@@ -11,13 +11,7 @@ public class LightConfiguration {
 	public static int GAP = 5;
 	public static int ON = 23;
 	public static int CYCLE = (ON * 2) + GAP;
-	public static int START3 = 0;
-	public static int START2 = (START3 + ON) % CYCLE;
-	public static int START1 = (START2 + ON) % CYCLE;
-	
-	public static int START4 = (START3 + ON + GAP) % CYCLE;
-	public static int START5 = (START4 + ON + GAP) % CYCLE;
-	public static int START6 = (START5 + ON + GAP) % CYCLE;
+	public static int[] START = new int[100];
 	
     public static final int LIGHT_RADIUS = 20;
     public static final int BOARD_DIMENSION = 100;
@@ -122,27 +116,24 @@ public class LightConfiguration {
     		if( j > max )
     			max = j;
     	
-    	int adjStart1 = START1;
-    	int adjStart2 = START2;
-    	
     	if(max == 1) {
-    		adjStart1 = START3;
+    		calculateStarts(1);
     	} else if(max == 2) {
-    		adjStart2 = START3;
-    		adjStart1 = (adjStart2 + ON) % CYCLE;
+    		calculateStarts(2);
     	}
+    	else calculateStarts(3);
     	
 		lights = new HashSet<Light>();
 		Light l;
 		for(int i=0; i<depths.length; i++)
 		{
-			int start = 0;
 			Point2D cur = lightSet.get(i);
 			
 			if(depths[i] == 0)
 			{
-				l = new Light(cur.getX(), cur.getY(), 1, 1, 0);
+				l = new Light(cur.getX(), cur.getY(), 1, 1, START[0]);
 				c = new Collector(cur.getX() - 0.5, cur.getY());
+				
 				boolean intersects = false;
 				for(Line2D wall : board)
 					if(c.intersects(wall))
@@ -214,31 +205,10 @@ public class LightConfiguration {
 			}
 			else
 			{
-				switch(depths[i])
-				{
-				case 1:
-					start = adjStart1;
-					break;
-				case 2:
-					start = adjStart2;
-					break;
-				case 3:
-					start = START3;
-					break;
-				case 4:
-					start = START4;
-					break;
-				case 5:
-					start = START5;
-					break;
-				case 6:
-					start = START5;
-					break;
-				default:
-					start = 5000;
-				}
-				
-				l = new Light(cur.getX(), cur.getY(), CYCLE, ON, start);
+				int startIndex = depths[i];
+				if(startIndex > 14)
+					startIndex = 14;
+				l = new Light(cur.getX(), cur.getY(), CYCLE, ON, START[startIndex]);
 			}
 			
 			lights.add(l);
@@ -246,7 +216,34 @@ public class LightConfiguration {
 			
 	}
     
-    public Set<Light> getActualLights()
+    private void calculateStarts(int max) {
+    	//light next to the collector is always on
+    	START[0] = 0;
+    	
+    	if(max == 1)
+		{
+			START[1] = 0;
+		}
+    	else if(max == 2)
+    	{
+    		START[2] = 0;
+    		START[1] = (START[2] + ON) % CYCLE;
+    	}
+    	else if(max == 3)
+    	{
+    		START[3] = 0;
+    		START[2] = (START[3] + ON) % CYCLE;
+    		START[1] = (START[2] + ON) % CYCLE;
+    	}
+    	
+    	for(int i= max + 1; i<START.length; i++)
+    	{
+    		START[i] = (START[i-1] + ON + GAP) % CYCLE;
+    	}
+    		
+	}
+
+	public Set<Light> getActualLights()
     {
     	return lights;
     }
