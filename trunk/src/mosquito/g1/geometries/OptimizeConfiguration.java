@@ -76,11 +76,11 @@ public class OptimizeConfiguration {
 		return randConfigs.getFirst();
 	}
 	
-	public List<LightConfiguration> calcOptimumConfigs()
+	public ArrayList<LightConfiguration> calcOptimumConfigs()
 	{
 		if(randConfigs.size() == 0)
 			calcOptimumConfig();
-		List<LightConfiguration> bestConfigs = new ArrayList<LightConfiguration>();
+		ArrayList<LightConfiguration> bestConfigs = new ArrayList<LightConfiguration>();
 		ListIterator<LightConfiguration> itr = randConfigs.listIterator();
 		for(int i=0; i<10 && itr.hasNext(); i++)
 		{

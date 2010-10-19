@@ -92,18 +92,21 @@ public class WalkTowardsTheLight extends Player {
 		LinkedList<Point2D> seeds = finder.getSeeds();
 		OptimizeConfiguration optimum = new OptimizeConfiguration(seeds, numLights);
 		
-		List<LightConfiguration> bestConfigs = optimum.calcOptimumConfigs();
-		//LightConfiguration l = getBestConfig(bestConfigs);
-		LightConfiguration l = bestConfigs.get(0);
+		ArrayList<LightConfiguration> bestConfigs = optimum.calcOptimumConfigs();
+		//LightConfiguration l = bestConfigs.get(0);
 		
-		l.calculateOptimalDepths();
-		System.out.println("printing lights");
-		for(Point2D p : l.getLights())
+		for(LightConfiguration config : bestConfigs)
 		{
-			System.out.println(p.getX() + " " + p.getY());
+			config.calculateOptimalDepths();
+			System.out.println("printing lights");
+			for(Point2D p : config.getLights())
+			{
+				System.out.println(p.getX() + " " + p.getY());
+			}
+			System.out.println("area covered: " + config.areaCovered());
 		}
-		System.out.println("area covered: " + l.areaCovered());
 		
+		LightConfiguration l = getBestConfig(bestConfigs);
 		collector = l.getCollector();
 		lights =  l.getActualLights();
 		
