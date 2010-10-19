@@ -69,9 +69,9 @@ public class LightConfiguration {
         double bestAverage = Double.POSITIVE_INFINITY;
         Map<Integer, Set<Integer>> edges = calculateEdges();
         
-        for(int trialCenter = 0; trialCenter < lightSet.size(); trialCenter++) {
+        for(int trialCenter = 0; trialCenter < edges.size(); trialCenter++) {
             // Create an array for calculating these depths
-            int[] depths = new int[lightSet.size()];
+            int[] depths = new int[edges.size()];
             // Set all depths to an unreasonable distance
             for(int i = 0; i < depths.length; i++) {
                 depths[i] = depths.length + 100;
@@ -131,7 +131,11 @@ public class LightConfiguration {
 		{
 			Point2D cur = lightSet.get(i);
 			
-			if(depths[i] == 0)
+			if(cur.getX() < 0)
+			{
+				l = new Light(0, 0, 0, 0, 0);
+			}
+			else if(depths[i] == 0)
 			{
 				l = new Light(cur.getX(), cur.getY(), 1, 1, START[0]);
 				c = new Collector(cur.getX() - COLLECTOR_OFFSET, cur.getY());
@@ -255,6 +259,8 @@ public class LightConfiguration {
 
 	public Set<Light> getActualLights()
     {
+		for(int i=lights.size(); i<lightSet.size(); i++)
+			lights.add(new Light(0,0,0,0,0));
     	return lights;
     }
     
@@ -274,20 +280,37 @@ public class LightConfiguration {
     private Map<Integer, Set<Integer>> calculateEdges() {
         Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
         
+        boolean []valid = new boolean[lightSet.size()];
         for(int i = 0; i < lightSet.size(); i++) {
-            result.put(i, new HashSet<Integer>());
+        	if(!(lightSet.get(i).getX() < 0))
+        	{
+        		result.put(i, new HashSet<Integer>());
+        		valid[i] = true;
+        	}
+        	else
+        		valid[i] = false;
         }
         
-        for(int i = 0; i < lightSet.size(); i++) {
-            for(int j = i + 1; j < lightSet.size(); j++) {
-                Point2D light1 = lightSet.get(i);
-                Point2D light2 = lightSet.get(j);
-                if(areConnected(light1, light2)) {
-                    //System.out.println("Link found between lights "+i+" and "+j);
-                    result.get(i).add(j);
-                    result.get(j).add(i);
-                }
-            }
+        for(int i = 0, k=0; i < lightSet.size() && k < result.size(); i++) {
+        	if(valid[i])
+        	{
+	            for(int j = i + 1, l =k+1; j < lightSet.size() && l < result.size(); j++) {
+	            	if(valid[j])
+	            	{
+		                Point2D light1 = lightSet.get(i);
+		                Point2D light2 = lightSet.get(j);
+		                if(areConnected(light1, light2)) {
+		                    //System.out.println("Link found between lights "+i+" and "+j);
+		                    result.get(k).add(l);
+		                    result.get(l).add(k);
+		                }
+		                
+		                l++;
+	            	}
+	            }
+	            
+	            k++;
+        	}
         }
         
         return result;

@@ -49,7 +49,7 @@ public class OptimizeConfiguration {
 				currentConfig = new LightConfiguration();
 				currentConfig.addLight(p);
 				
-				currentConfig = findRandomConfiguration(currentConfig, RADIUS);
+				currentConfig = findRandomConfiguration(currentConfig);
 				if(currentConfig != null)
 				{
 					ListIterator<LightConfiguration> it = randConfigs.listIterator();
@@ -93,15 +93,17 @@ public class OptimizeConfiguration {
 
 	//need to add uniqueness check
 	//need to keep track of pruned points
-	private LightConfiguration findRandomConfiguration(LightConfiguration currentConfig, double currentRadius) {
+	private LightConfiguration findRandomConfiguration(LightConfiguration currentConfig) {
 		long curTime = System.currentTimeMillis();
 		//instantiate local variables
 		config = new LightConfiguration(currentConfig);
 		currentLights = config.getLights();
 		points = new LinkedList<Point2D>();
+		double currentRadius = RADIUS;
 
 		//create a random configuration
-		for(int i=0; i<numLights-1; i++)
+		int lightsAdded = 1;
+		while(lightsAdded < numLights)
 		{
 			//reset local variables
 			totalArea = 0;
@@ -125,7 +127,7 @@ public class OptimizeConfiguration {
 			}
 			
 			//add leftmost point to potentials
-			Point2D newestLight = currentLights.get(i);
+			Point2D newestLight = currentLights.get(lightsAdded - 1);
 			double centerX = newestLight.getX();
 			double centerY = newestLight.getY();
 			
@@ -195,17 +197,40 @@ public class OptimizeConfiguration {
 			{
 				currentRadius--;
 				if(currentRadius < 1)
-					return null;
-				return findRandomConfiguration(currentConfig, currentRadius);
+				{
+					if(currentLights.size() > 0)
+					{
+						fillWithDummies(lightsAdded);
+						return config;
+					}
+					else
+						return null;
+				}
 			}
-			
-			//add chosen light to the configuration and remove it from potentials 
-			config.addLight(maxLight);
-			points.remove(maxLight);
+			else
+			{
+				//add chosen light to the configuration and remove it from potentials 
+				lightsAdded++;
+				currentRadius = RADIUS;
+				config.addLight(maxLight);
+				points.remove(maxLight);
+				
+				if(config.areaCovered() > 5000)
+				{
+					fillWithDummies(lightsAdded);
+					return config;
+				}
+			}
 		}
 		
 		//System.out.println(System.currentTimeMillis() - curTime);
 		return config;
+	}
+	
+	private void fillWithDummies(int lightsAdded)
+	{
+		for(int i=lightsAdded; i<numLights; i++)
+			config.addLight(new Point2D.Double(-1, -1));
 	}
 	
 	private void addIfValid(double x, double y, Point2D l)
