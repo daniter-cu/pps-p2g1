@@ -10,7 +10,7 @@ public class OptimizeConfiguration {
 	private LinkedList<Point2D> seedLights;
 	private LinkedList<LightConfiguration> randConfigs = new LinkedList<LightConfiguration>();
 	private int numLights;
-	private double radius = 20;
+	private final double RADIUS = 20;
 	private final double AREA_THRESHOLD = 0;
 	private final int MAX_ITERATIONS = 100;
 	private final int MAX_CONFIGS = 1;
@@ -49,21 +49,24 @@ public class OptimizeConfiguration {
 				currentConfig = new LightConfiguration();
 				currentConfig.addLight(p);
 				
-				currentConfig = findRandomConfiguration(currentConfig);
-				ListIterator<LightConfiguration> it = randConfigs.listIterator();
-				boolean inserted = false;
-				while(it.hasNext() && !inserted)
+				currentConfig = findRandomConfiguration(currentConfig, RADIUS);
+				if(currentConfig != null)
 				{
-					LightConfiguration config = it.next();
-					if(currentConfig.areaCovered() > config.areaCovered())
+					ListIterator<LightConfiguration> it = randConfigs.listIterator();
+					boolean inserted = false;
+					while(it.hasNext() && !inserted)
 					{
-						it.previous();
-						it.add(currentConfig);
-						inserted = true;
+						LightConfiguration config = it.next();
+						if(currentConfig.areaCovered() > config.areaCovered())
+						{
+							it.previous();
+							it.add(currentConfig);
+							inserted = true;
+						}
 					}
+					if(!inserted)
+						it.add(currentConfig);
 				}
-				if(!inserted)
-					it.add(currentConfig);
 			}
 			
 			num_iterations++;
@@ -90,7 +93,7 @@ public class OptimizeConfiguration {
 
 	//need to add uniqueness check
 	//need to keep track of pruned points
-	private LightConfiguration findRandomConfiguration(LightConfiguration currentConfig) {
+	private LightConfiguration findRandomConfiguration(LightConfiguration currentConfig, double currentRadius) {
 		long curTime = System.currentTimeMillis();
 		//instantiate local variables
 		config = new LightConfiguration(currentConfig);
@@ -126,18 +129,18 @@ public class OptimizeConfiguration {
 			double centerX = newestLight.getX();
 			double centerY = newestLight.getY();
 			
-			x = centerX - radius;
+			x = centerX - currentRadius;
 			y = centerY;
 			l = new Point2D.Double(x, y);
 			addIfValid(x, y, l);
 				
 			//add rightmost point to potentials
-			x = centerX + radius;
+			x = centerX + currentRadius;
 			l = new Point2D.Double(x, y);
 			addIfValid(x, y, l);
 			
 			//add all central points to potentials
-			double increment = radius / 9.0;
+			double increment = currentRadius / 9.0;
 			for(int j = -8; j <= 8; j++)
 			{
 				x = centerX + ((double)j * increment);
@@ -187,9 +190,17 @@ public class OptimizeConfiguration {
 				}
 			}
 			
+			//check that a usable light position was found
+			if(maxArea == 0)
+			{
+				currentRadius--;
+				if(currentRadius < 1)
+					return null;
+				return findRandomConfiguration(currentConfig, currentRadius);
+			}
+			
 			//add chosen light to the configuration and remove it from potentials 
 			config.addLight(maxLight);
-			//litr.remove();
 			points.remove(maxLight);
 		}
 		
@@ -212,7 +223,7 @@ public class OptimizeConfiguration {
 	//calculate the positive y value on the circle, given the x
 	private double getY(double x, double centerX, double centerY, boolean negate)
 	{
-		return (negate ? -1 : 1) * Math.sqrt(Math.pow(radius, 2) - Math.pow(x - centerX, 2)) + centerY;
+		return (negate ? -1 : 1) * Math.sqrt(Math.pow(RADIUS, 2) - Math.pow(x - centerX, 2)) + centerY;
 	}
 
 }
