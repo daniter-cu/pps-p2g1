@@ -8,7 +8,7 @@ import mosquito.sim.Collector;
 import mosquito.sim.Light;
 
 public class LightConfiguration {
-	public static final int[] START = new int[100];
+	public int[] START = new int[100];
 	
     public static final int LIGHT_RADIUS = 20;
     public static final int BOARD_DIMENSION = 100;
@@ -63,7 +63,20 @@ public class LightConfiguration {
         return lightSet;
     }
     
-    public void calculateOptimalDepths() {
+    public void calculateOptimalDepths()
+    {
+    	int[] depths = calculateDepthsPrivate();
+    	int max = findMaxDepth(depths);
+    	createLights(depths, max);
+    }
+    
+    public int findMaxDepth()
+    {
+    	int[] depths = calculateDepthsPrivate();
+    	return findMaxDepth(depths);
+    }
+    
+    private int []calculateDepthsPrivate() {
         int[] bestDepths = new int[0];
         double bestAverage = Double.POSITIVE_INFINITY;
         Map<Integer, Set<Integer>> edges = calculateEdges();
@@ -102,21 +115,27 @@ public class LightConfiguration {
             }
         }
         
-        for(int i=0; i<bestDepths.length; i++)
-        {
-        	System.out.println(bestDepths[i]);
-        }
+//        for(int i=0; i<bestDepths.length; i++)
+//        {
+//        	System.out.println(bestDepths[i]);
+//        }
         
-        createLights(bestDepths);
+        return bestDepths;
     }
     
-    private void createLights(int[] depths)
-	{
+    private int findMaxDepth(int[] depths)
+    {	
     	int max = 0;
     	for(int j : depths)
-    		if( j > max )
+    		if( j > max && j < 100 )
     			max = j;
     	
+    	return max;
+    }
+    
+    private void createLights(int[] depths, int max)
+	{	
+    	calculateStarts(max);
     	if(max == 1) {
     		calculateStarts(1);
     	} else if(max == 2) {
@@ -233,28 +252,13 @@ public class LightConfiguration {
     private void calculateStarts(int max) {
     	//light next to the collector is always on
     	START[0] = 0;
+    	START[max] = 0;
     	
-    	if(max == 1)
-		{
-			START[1] = 0;
-		}
-    	else if(max == 2)
-    	{
-    		START[2] = 0;
-    		START[1] = (START[2] + cycleOn) % cycleLength;
-    	}
-    	else if(max == 3)
-    	{
-    		START[3] = 0;
-    		START[2] = (START[3] + cycleOn) % cycleLength;
-    		START[1] = (START[2] + cycleOn) % cycleLength;
-    	}
+    	for(int i=max-1; i>0; i--)
+    		START[i] = (START[i+1] + cycleOn) % cycleLength;
     	
-    	for(int i= max + 1; i<START.length; i++)
-    	{
+    	for(int i=max+1; i<START.length; i++)
     		START[i] = (START[i-1] + cycleOn + cycleGap) % cycleLength;
-    	}
-    		
 	}
 
 	public Set<Light> getActualLights()

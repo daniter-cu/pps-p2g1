@@ -9,8 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import mosquito.g1.geometries.LightConfiguration;
 import mosquito.g1.geometries.OptimizeConfiguration;
 import mosquito.g1.geometries.SpaceFinder;
@@ -18,27 +16,32 @@ import mosquito.sim.Collector;
 import mosquito.sim.GameListener;
 import mosquito.sim.Light;
 import mosquito.sim.Player;
-import mosquito.sim.GameListener.GameUpdateType;
+
+import org.apache.log4j.Logger;
 
 public class WalkTowardsTheLight extends Player {
 	private Logger log = Logger.getLogger(this.getClass());
 	private Set<Line2D> walls = new HashSet<Line2D>();
 	private int numLights;
-	private final static int INTERVAL = 40;
-	private final static int ON_TIME = 20;
+	private int INTERVAL = 40;
+	private int ON_TIME = 20;
+	private int OUTER_ON_TIME = 10;
 	private final static double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
-	private final static int OUTER_ON_TIME = 10;
 	private final static int GAP_THRESHOLD = 1;
 	//private double BASE = 50;
 	private double baseX = 50;
 	private double baseY = 50;
     private static int rounds;
 	private boolean [][] openGridSpots = new boolean[100][100];
-	private boolean isSimulated = false;
+	private boolean isSimulated = true;
 	private Collector collector;
 	private Set<Light> lights;
-	private Collector simCollector;
-	private Set<Light> simLights;
+	private static Collector simCollector;
+	private static Set<Light> simLights;
+	
+	private static int MAX_ROUNDS = 3000;
+	private static int MIN_ON = 18;
+	private static int MAX_ON = 30;
 	
 	@Override
 	public String getName() {
@@ -52,10 +55,9 @@ public class WalkTowardsTheLight extends Player {
 	
 	private int runSimulator(Set<Light> lights, Collector col)
 	{
-		isSimulated = true;
 		simCollector = col;
 		simLights = lights;
-		this.runSimulation(5000,new GameListener() {
+		this.runSimulation(MAX_ROUNDS,new GameListener() {
 			
 			@Override
 			public void gameUpdated(GameUpdateType type) {
@@ -69,7 +71,7 @@ public class WalkTowardsTheLight extends Player {
 				}
 			}
 		});
-		isSimulated = false;
+		//isSimulated = false;
 		return rounds;
 	}
 
@@ -80,29 +82,35 @@ public class WalkTowardsTheLight extends Player {
         if(walls != null)
         	this.walls = tightenWalls(walls);
         LightConfiguration.addWalls(this.walls);
+        ArrayList<LightConfiguration> bestConfigs = new ArrayList<LightConfiguration>();
         
         if(walls.size() == 0) {
-			lights = getCentralShape(DISPLACEMENTS[Math.min(numLights - 1, 9)], 2);
-			return;
+        	Set<Light> bestLights = getCentralShape(DISPLACEMENTS[Math.min(numLights - 1, 9)], 2);
+        	lights =  bestLights;
+        	isSimulated = false;
+        	return;
         }
-		
-		SpaceFinder finder = new SpaceFinder(this.walls);
-		LinkedList<Point2D> seeds = finder.getSeeds();
-		OptimizeConfiguration optimum = new OptimizeConfiguration(seeds, numLights);
-		
-		ArrayList<LightConfiguration> bestConfigs = optimum.calcOptimumConfigs();
-		//LightConfiguration l = bestConfigs.get(0);
+        else
+        {
+			SpaceFinder finder = new SpaceFinder(this.walls);
+			LinkedList<Point2D> seeds = finder.getSeeds();
+			OptimizeConfiguration optimum = new OptimizeConfiguration(seeds, numLights);
+			
+			bestConfigs = optimum.calcOptimumConfigs();
+        }
 		
 		for(LightConfiguration config : bestConfigs) {
 			config.calculateOptimalDepths();
 			System.out.println("printing lights");
-			for(Point2D p : config.getLights()) {
+			for(Light p : config.getActualLights())
+			{
 				System.out.println(p.getX() + " " + p.getY());
 			}
 			System.out.println("area covered: " + config.areaCovered());
 		}
 		
 		LightConfiguration l = getBestConfig(bestConfigs);
+		isSimulated = false;
 		collector = l.getCollector();
 		lights =  l.getActualLights();
 		
@@ -111,25 +119,29 @@ public class WalkTowardsTheLight extends Player {
 	}
 	
 	private LightConfiguration getBestConfig(ArrayList<LightConfiguration> lcs) {
-		int bestRound = 0;
+		int bestRound = Integer.MAX_VALUE;
 		int temp = 0;
 		int bestOn = 0;
 		int bestGap = 0;
 		LightConfiguration best = null;
-		for(LightConfiguration lc : lcs) {
-			for(int on = 18; on < 30; on++) {
-				for(int gap = 3; gap < 9; gap++) {
-				    lc.setOnAndGap(on, gap);
-					temp = runSimulator(lc.getActualLights(), lc.getCollector());
-					if(temp > bestRound) {
-						bestRound = temp;
-						best = lc;
-						bestOn = on;
-						bestGap = gap;
-					}
+		for(LightConfiguration lc : lcs)
+		{
+			for(int on = MIN_ON; on <= MAX_ON; on++)
+			{
+			    lc.setOnAndGap(on, 5);
+			    System.out.println("simulation started");
+				temp = runSimulator(lc.getActualLights(), lc.getCollector());
+			    System.out.println("simulation ended, num rounds: " + temp);
+				if(temp < bestRound)
+				{
+					best = lc;
+					bestOn = on;
+					bestGap = 5;
 				}
 			}
 		}
+		
+		System.out.println("best round: " + bestRound);
 		best.setOnAndGap(bestOn, bestGap);
 		return best;
 	}
