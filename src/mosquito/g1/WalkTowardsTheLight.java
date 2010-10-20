@@ -134,6 +134,7 @@ public class WalkTowardsTheLight extends Player {
 			    System.out.println("simulation ended, num rounds: " + temp);
 				if(temp < bestRound)
 				{
+					bestRound = temp;
 					best = lc;
 					bestOn = on;
 					bestGap = 5;
