@@ -6,10 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * A class to handle the orchestration of building an optimum configuration
+ * @author Dan Wilkey
+ */
 public class OptimizeConfiguration {
-	private LinkedList<Point2D> seedLights;
-	private LinkedList<LightConfiguration> randConfigs = new LinkedList<LightConfiguration>();
-	private int numLights;
 	private static final double RADIUS = 20;
 	private static final double AREA_THRESHOLD = 0;
 	private static final double EDGE_POINT_RESOLUTION = 36.0;
@@ -18,22 +19,31 @@ public class OptimizeConfiguration {
 	private static final int NUM_TOP_CONFIGS = 5;
 	private static final double AREA_LIMIT = 5000;
 
+	private LinkedList<Point2D> seedLights;
+    private LinkedList<LightConfiguration> randConfigs = new LinkedList<LightConfiguration>();
+    private int numLights;
 	private LightConfiguration config;
 	private List<Point2D> currentLights;
 	private LinkedList<LightWithArea> points;
-	double x, y, area, totalArea;
-	boolean reachable;
+	private double x, y, area, totalArea;
+	private boolean reachable;
 	
-	public OptimizeConfiguration(LinkedList<Point2D> seedLights, int numLights)
-	{
+	/**
+	 * Constructor
+	 * @param seedLights The points where a configuration should be built out from
+	 * @param numLights The number of lights to place in each configuration
+	 */
+	public OptimizeConfiguration(LinkedList<Point2D> seedLights, int numLights) {
 		this.seedLights = seedLights;
 		this.numLights = numLights;
 	}
 	
-	public LightConfiguration calcOptimumConfig()
-	{
-		if(seedLights.size() == 0)
-		{
+	/**
+	 * From the passed values, calculate the optimum light configuration
+	 * @return The calculated optimum configuration
+	 */
+	public LightConfiguration calcOptimumConfig() {
+		if(seedLights.size() == 0) {
 			System.err.println("No seed lights!");
 			return null;
 		}
@@ -43,23 +53,18 @@ public class OptimizeConfiguration {
 		
 		//create 100,000 configurations
 		int num_iterations = 0;
-		for(Point2D p : seedLights)
-		{
-			for(int j=0; j<MAX_CONFIGS; j++)
-			{
+		for(Point2D p : seedLights) {
+			for(int j=0; j < MAX_CONFIGS; j++) {
 				currentConfig = new LightConfiguration();
 				currentConfig.addLight(p);
 				
 				currentConfig = findRandomConfiguration(currentConfig);
-				if(currentConfig != null)
-				{
+				if(currentConfig != null) {
 					ListIterator<LightConfiguration> it = randConfigs.listIterator();
 					boolean inserted = false;
-					while(it.hasNext() && !inserted)
-					{
+					while(it.hasNext() && !inserted) {
 						LightConfiguration config = it.next();
-						if(currentConfig.areaCovered() > config.areaCovered())
-						{
+						if(currentConfig.areaCovered() > config.areaCovered()) {
 							it.previous();
 							it.add(currentConfig);
 							inserted = true;
@@ -92,10 +97,8 @@ public class OptimizeConfiguration {
 		return bestConfigs;
 	}
 
-	//need to add uniqueness check
-	//need to keep track of pruned points
 	private LightConfiguration findRandomConfiguration(LightConfiguration currentConfig) {
-		long curTime = System.currentTimeMillis();
+		//long curTime = System.currentTimeMillis();
 		//instantiate local variables
 		config = new LightConfiguration(currentConfig);
 		currentLights = config.getLights();
@@ -133,19 +136,10 @@ public class OptimizeConfiguration {
 			addAllPointsAroundCircle(lightsAdded - 1, lightsAdded, currentRadius);
 			
 			//weight by marginal area and choose a random point for light placement
-			int next = (int) (Math.random() * totalArea);
 			ListIterator<LightWithArea> litr = points.listIterator();
-			//Point2D curLight = litr.next();
-			//double curArea = itr.next();
-			
-//			for(double j=curArea; j<next; j += curArea)
-//			{
-//					curArea = itr.next();
-//					curLight = litr.next();
-//			}
-			
 			LightWithArea curLight;
 			LightWithArea maxLight = new LightWithArea();
+			
 			while(litr.hasNext())
 			{
 				curLight = litr.next();
@@ -222,6 +216,12 @@ public class OptimizeConfiguration {
 		return config;
 	}
 	
+	/**
+	 * Calculate what points are around the circle's circumference and add the pertinent ones.
+	 * @param index The light to circle around.
+	 * @param lightsAdded How many lights are added.
+	 * @param currentRadius How far out from the point to look.
+	 */
 	private void addAllPointsAroundCircle(int index, int lightsAdded, double currentRadius)
 	{
 		Point2D newestLight = currentLights.get(index);
@@ -253,7 +253,8 @@ public class OptimizeConfiguration {
 	 * @param toTheLeft Whether to move left or right of the center
 	 * @return The point computed from these parameters
 	 */
-	private Point2D getPointFromCenter(double centerX, double centerY, double degrees, double radius, boolean toTheLeft) {
+	private Point2D getPointFromCenter(double centerX, double centerY, double degrees,
+	        double radius, boolean toTheLeft) {
 	    x = centerX + (toTheLeft ? -1 : 1) * radius * Math.cos(Math.toRadians(Math.abs(degrees)));
 	    
 	    Point2D result = new Point2D.Double(x, getY(x, centerX, centerY, radius, (degrees < 0)));
@@ -261,36 +262,39 @@ public class OptimizeConfiguration {
 	    return result;
 	}
 	
-	private void fillWithDummies(int lightsAdded)
-	{
+	/**
+	 * Fill the empty points in the light set with off-board lights
+	 * @param lightsAdded How many lights are already added.
+	 */
+	private void fillWithDummies(int lightsAdded) {
 		for(int i=lightsAdded; i<numLights; i++)
 			config.addLight(new Point2D.Double(-1, -1));
 	}
 	
-	private void addIfValid(Point2D l)
-	{
+	/**
+	 * Add a point to the configuration if it is reachable, unique, and adds enough area.
+	 * @param l The light point to check
+	 */
+	private void addIfValid(Point2D l) {
 		reachable = config.isReachableFromConfiguration(l);
 		area = LightConfiguration.marginalArea(l, currentLights);
-		if(reachable && area > AREA_THRESHOLD && !points.contains(l))
-		{
+		if(reachable && area > AREA_THRESHOLD && !points.contains(l)) {
 			points.add(new LightWithArea(l, area));
 			totalArea += area;
 		}
 	}
 	
-	//calculate the positive y value on the circle, given the x
-	private double getY(double x, double centerX, double centerY, boolean negate)
-	{
-		return getY(x, centerX, centerY, RADIUS, negate);
-	}
-	
+	/**
+	 * Calculate the Y value of a circle's edge coordinate based on the x and the circle
+	 * @param negate Whether to go above the center or below
+	 * @return The y value of the coordinate
+	 */
 	private double getY(double x, double centerX, double centerY, double radius, boolean negate)
     {
         return (negate ? -1 : 1) * Math.sqrt(Math.pow(radius, 2) - Math.pow(x - centerX, 2)) + centerY;
     }
 
-	private class LightWithArea implements Comparable<LightWithArea>
-	{
+	private class LightWithArea implements Comparable<LightWithArea> {
 		public double marginalArea;
 		public Point2D light;
 		

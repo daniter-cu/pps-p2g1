@@ -19,6 +19,10 @@ import mosquito.sim.Player;
 
 import org.apache.log4j.Logger;
 
+/**
+ * The root player for Group 1
+ * @author Dan Wilkey, Dan Iter, and Zack Sheppard
+ */
 public class WalkTowardsTheLight extends Player {
 	private Logger log = Logger.getLogger(this.getClass());
 	private Set<Line2D> walls = new HashSet<Line2D>();
@@ -26,9 +30,6 @@ public class WalkTowardsTheLight extends Player {
 	private int INTERVAL = 40;
 	private int ON_TIME = 20;
 	private int OUTER_ON_TIME = 10;
-	private final static double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
-	private final static int GAP_THRESHOLD = 1;
-	//private double BASE = 50;
 	private double baseX = 50;
 	private double baseY = 50;
     private static int rounds;
@@ -39,9 +40,11 @@ public class WalkTowardsTheLight extends Player {
 	private static Collector simCollector;
 	private static Set<Light> simLights;
 	
-	private static int MAX_ROUNDS = 3000;
-	private static int MIN_ON = 18;
-	private static int MAX_ON = 30;
+	private final static double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
+    private final static int GAP_THRESHOLD = 1;
+	private final static int MAX_ROUNDS = 3000;
+	private final static int MIN_ON = 18;
+	private final static int MAX_ON = 30;
 	
 	@Override
 	public String getName() {
