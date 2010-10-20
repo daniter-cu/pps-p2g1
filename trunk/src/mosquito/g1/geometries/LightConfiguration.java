@@ -7,62 +7,89 @@ import java.util.*;
 import mosquito.sim.Collector;
 import mosquito.sim.Light;
 
+/**
+ * Storage and utility methods for light configuration
+ * @author Zack Sheppard
+ */
 public class LightConfiguration {
 	public int[] START = new int[100];
 	
     public static final int LIGHT_RADIUS = 20;
     public static final int BOARD_DIMENSION = 100;
     public static final double AREA_RESOLUTION = 1.0;
-    public static final double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2)); 
-    
+    public static final double BASE_AREA = (Math.PI * Math.pow(LIGHT_RADIUS, 2));
     public static final double COLLECTOR_OFFSET = 0.5;
     
     private int cycleGap = 5;
     private int cycleOn = 23;
     private int cycleLength = (cycleOn * 2) + cycleGap;
+    private double areaCovered = 0;
     
     private ArrayList<Point2D> lightSet;
     private static Set<Line2D> board;
-    private double areaCovered = 0;
     
     private Set<Light> actualLights;
     private Collector c;
     
+    /**
+     * Default empty constructor.
+     */
     public LightConfiguration() {
         lightSet = new ArrayList<Point2D>();
     }
     
+    /**
+     * Cloning constructor.
+     * @param other The other configuration to copy.
+     */
     public LightConfiguration(LightConfiguration other)
     {
         lightSet = new ArrayList<Point2D>(other.lightSet);
         areaCovered = other.areaCovered;
     }
     
+    /**
+     * Add a light to the configuration's set.
+     * @param light The light to add.
+     */
     public void addLight(Point2D light) {
         areaCovered += marginalArea(light, lightSet);
         lightSet.add(light);
     }
     
+    /**
+     * Set the on-time and the cycle gap, then update the cycle length based on them.
+     */
     public void setOnAndGap(int on, int gap) {
         this.cycleOn = on;
         this.cycleGap = gap;
         this.cycleLength = (cycleOn * 2) + cycleGap;
     }
     
+    /**
+     * Add the board configuration
+     */
     public static void addWalls(Set<Line2D> board) {
-        //if(board == null) {
-            LightConfiguration.board = board;
-        //}
+        LightConfiguration.board = board;
     }
     
+    /**
+     * Wipe out the stored board.
+     */
     public static void clearBoard() {
         board = null;
     }
     
+    /**
+     * @return the base set of light points
+     */
     public List<Point2D> getLights() {
         return lightSet;
     }
     
+    /**
+     * Calculate the optimal depths for all the lights
+     */
     public void calculateOptimalDepths()
     {
     	int[] depths = calculateDepthsPrivate();
@@ -70,13 +97,19 @@ public class LightConfiguration {
     	createLights(depths, max);
     }
     
+    /**
+     * @return the maximum depth
+     */
     public int findMaxDepth()
     {
     	int[] depths = calculateDepthsPrivate();
     	return findMaxDepth(depths);
     }
     
-    private int []calculateDepthsPrivate() {
+    /**
+     * Find the actual optimal depths for all the lights
+     */
+    private int[] calculateDepthsPrivate() {
         int[] bestDepths = new int[0];
         double bestAverage = Double.POSITIVE_INFINITY;
         Map<Integer, Set<Integer>> edges = calculateEdges();
@@ -115,16 +148,10 @@ public class LightConfiguration {
             }
         }
         
-//        for(int i=0; i<bestDepths.length; i++)
-//        {
-//        	System.out.println(bestDepths[i]);
-//        }
-        
         return bestDepths;
     }
     
-    private int findMaxDepth(int[] depths)
-    {	
+    private int findMaxDepth(int[] depths) {
     	int max = 0;
     	for(int j : depths)
     		if( j > max && j < 100 )
@@ -133,8 +160,7 @@ public class LightConfiguration {
     	return max;
     }
     
-    private void createLights(int[] depths, int max)
-	{	
+    private void createLights(int[] depths, int max) {
     	calculateStarts(max);
     	if(max == 1) {
     		calculateStarts(1);
@@ -261,15 +287,13 @@ public class LightConfiguration {
     		START[i] = (START[i-1] + cycleOn + cycleGap) % cycleLength;
 	}
 
-	public Set<Light> getActualLights()
-    {
+	public Set<Light> getActualLights() {
 		for(int i=actualLights.size(); i<lightSet.size(); i++)
 			actualLights.add(new Light(0,0,0,0,0));
     	return actualLights;
     }
     
-    public Collector getCollector()
-    {
+    public Collector getCollector() {
     	return c;
     }
     
@@ -340,12 +364,13 @@ public class LightConfiguration {
         return areaSoFar;
     }
     
-    public static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore) {
-        /*System.out.println("The new light ["+newLight.getX()+", "+newLight.getY()+"]");
-        for(Point2D light : lightsToIgnore) {
-            System.out.println("The old light ["+light.getX()+", "+light.getY()+"]");
-        }*/
-        
+    /**
+     * Calculate the area newly illuminated by a light added
+     * @param newLight The light being added
+     * @param lightsToIgnore The lights already on the board
+     * @return The area newly illuminated (approximately)
+     */
+    public static double marginalArea(Point2D newLight, List<Point2D> lightsToIgnore) {        
         double area = 0.;
         Line2D connection;
         Point2D current;
@@ -450,31 +475,5 @@ public class LightConfiguration {
      */
     private static boolean wallShadows(Point2D light, Line2D wall) {
         return (wall.ptSegDist(light) < LIGHT_RADIUS);
-    }
-    
-    public static void main(String[] args) {
-        List<Point2D> lights = new ArrayList<Point2D>();
-        Set<Line2D> board = new HashSet<Line2D>();
-        int i;
-        for(i = 0; !args[i].equals("and"); i++) {
-            if(i%2 == 1) {
-                lights.add(new Point2D.Double(Double.parseDouble(args[i-1]), Double.parseDouble(args[i])));
-            }
-        }
-        
-        i++;
-        
-        for(int initI = i; i < args.length; i++) {
-            if((initI - i)%4 == 3) {
-                board.add(new Line2D.Double(new Point2D.Double(Double.parseDouble(args[i-3]), Double.parseDouble(args[i-2])),
-                    new Point2D.Double(Double.parseDouble(args[i-1]), Double.parseDouble(args[i]))));
-            }
-        }
-        
-        Point2D center = lights.get(0);
-        lights.remove(0);
-        LightConfiguration.clearBoard();
-        LightConfiguration.addWalls(board);
-        System.out.println(LightConfiguration.marginalArea(center, lights));
     }
 }
