@@ -15,6 +15,8 @@ public class OptimizeConfiguration {
 	private static final double EDGE_POINT_RESOLUTION = 36.0;
 	private static final int MAX_ITERATIONS = 100;
 	private static final int MAX_CONFIGS = 1;
+	private static final int NUM_TOP_CONFIGS = 5;
+	private static final double AREA_LIMIT = 5000;
 
 	private LightConfiguration config;
 	private List<Point2D> currentLights;
@@ -82,7 +84,7 @@ public class OptimizeConfiguration {
 			calcOptimumConfig();
 		ArrayList<LightConfiguration> bestConfigs = new ArrayList<LightConfiguration>();
 		ListIterator<LightConfiguration> itr = randConfigs.listIterator();
-		for(int i=0; i<10 && itr.hasNext(); i++)
+		for(int i=0; i<NUM_TOP_CONFIGS && itr.hasNext(); i++)
 		{
 			bestConfigs.add(itr.next());
 		}
@@ -181,14 +183,38 @@ public class OptimizeConfiguration {
 				//add chosen light to the configuration and remove it from potentials 
 				lightsAdded++;
 				currentRadius = RADIUS;
-				config.addLight(maxLight.light);
-				points.remove(maxLight);
 				
-				if(config.areaCovered() > 5000)
+				LightConfiguration tempConfig = new LightConfiguration(config);
+				tempConfig.addLight(maxLight.light);
+				if(tempConfig.areaCovered() > AREA_LIMIT)
 				{
+					double difference = AREA_LIMIT - config.areaCovered();
+					int bestDepth = tempConfig.findMaxDepth();
+					int curDepth = 100;
+					litr = points.listIterator();
+					while(litr.hasNext())
+					{
+						curLight = litr.next();
+						if(curLight.marginalArea > difference)
+						{
+							tempConfig = new LightConfiguration(config);
+							tempConfig.addLight(curLight.light);
+							curDepth = tempConfig.findMaxDepth();
+							if(curDepth < bestDepth)
+							{
+								bestDepth = curDepth;
+								maxLight = curLight;
+							}
+						}
+					}
+					
+					config.addLight(maxLight.light);
 					fillWithDummies(lightsAdded);
 					return config;
 				}
+				
+				config.addLight(maxLight.light);
+				points.remove(maxLight);
 			}
 		}
 		
