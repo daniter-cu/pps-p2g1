@@ -162,15 +162,25 @@ public class WalkTowardsTheLight extends Player {
 		Light l1 = new Light(baseX,baseY,1,1,0);
 		collector = new Collector(50.5, 50);
 		
-		Light l2 = new Light(baseX - displacement,baseY + displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
-		Light l3 = new Light(baseX + displacement,baseY - displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
-		Light l4 = new Light(baseX + displacement,baseY + displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
-		Light l5 = new Light(baseX - displacement,baseY - displacement,INTERVAL,ON_TIME,OUTER_ON_TIME-1);
+		int bonus= 0;
 		
-		Light l10 = new Light(baseX - levels*displacement,baseY + levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
-		Light l11 = new Light(baseX + levels*displacement,baseY - levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
-		Light l12 = new Light(baseX + levels*displacement,baseY + levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
-		Light l13 = new Light(baseX - levels*displacement,baseY - levels*displacement,INTERVAL,OUTER_ON_TIME,(2 - levels) * (OUTER_ON_TIME-1));
+		if(numLights == 8 || numLights == 5)
+			bonus = 7;
+		if(numLights == 5)
+		{
+			bonus += 9;
+			INTERVAL += 8;
+		}
+		
+		Light l2 = new Light(baseX - displacement,baseY + displacement,INTERVAL+5,ON_TIME+bonus+4,(OUTER_ON_TIME-1)*0);
+		Light l3 = new Light(baseX + displacement,baseY - displacement,INTERVAL+5,ON_TIME+bonus+4,(OUTER_ON_TIME-1)*0);
+		Light l4 = new Light(baseX + displacement,baseY + displacement,INTERVAL+5,ON_TIME+bonus+4,(OUTER_ON_TIME-1)*0);
+		Light l5 = new Light(baseX - displacement,baseY - displacement,INTERVAL+5,ON_TIME+bonus+4,(OUTER_ON_TIME-1)*0);
+		
+		Light l10 = new Light(baseX - levels*displacement,baseY + levels*displacement,INTERVAL,OUTER_ON_TIME+4,((2 - levels) * (OUTER_ON_TIME-1))*0);
+		Light l11 = new Light(baseX + levels*displacement,baseY - levels*displacement,INTERVAL,OUTER_ON_TIME+4,((2 - levels) * (OUTER_ON_TIME-1))*0);
+		Light l12 = new Light(baseX + levels*displacement,baseY + levels*displacement,INTERVAL,OUTER_ON_TIME+4,((2 - levels) * (OUTER_ON_TIME-1))*0);
+		Light l13 = new Light(baseX - levels*displacement,baseY - levels*displacement,INTERVAL,OUTER_ON_TIME+4,((2 - levels) * (OUTER_ON_TIME-1))*0);
 		
 		Light l14 = new Light(baseX-0.5, baseY, 2, 1, 0);
 		Light l15 = new Light(baseX+0.5, baseY, 2, 1, 1);
