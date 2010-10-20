@@ -24,10 +24,11 @@ public class WalkTowardsTheLight extends Player {
 	private Logger log = Logger.getLogger(this.getClass());
 	private Set<Line2D> walls = new HashSet<Line2D>();
 	private int numLights;
-	private int INTERVAL = 40;
-	private int ON_TIME = 20;
-	private double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
-	private int OUTER_ON_TIME = 10;
+	private final static int INTERVAL = 40;
+	private final static int ON_TIME = 20;
+	private final static double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
+	private final static int OUTER_ON_TIME = 10;
+	private final static int GAP_THRESHOLD = 1;
 	//private double BASE = 50;
 	private double baseX = 50;
 	private double baseY = 50;
@@ -58,13 +59,11 @@ public class WalkTowardsTheLight extends Player {
 			
 			@Override
 			public void gameUpdated(GameUpdateType type) {
-				if(type.equals(GameUpdateType.MOVEPROCESSED))
-				{
+				if(type.equals(GameUpdateType.MOVEPROCESSED)) {
 					rounds = getSimulationRounds();
 					//log.debug("We had a move happen, " + getSimulationRounds() +", caught: " + getSimulationNumCaught());
 				}
-				else if(type.equals(GameUpdateType.GAMEOVER))
-				{
+				else if(type.equals(GameUpdateType.GAMEOVER)) {
 					rounds = getSimulationRounds();
 					//log.debug("Game ended at ticks: " + getSimulationRounds());
 				}
@@ -79,11 +78,10 @@ public class WalkTowardsTheLight extends Player {
 		this.numLights = NumLights;
         LightConfiguration.clearBoard();
         if(walls != null)
-        	this.walls = walls;
+        	this.walls = tightenWalls(walls);
         LightConfiguration.addWalls(this.walls);
         
-        if(walls.size() == 0)
-        {
+        if(walls.size() == 0) {
 			lights = getCentralShape(DISPLACEMENTS[Math.min(numLights - 1, 9)], 2);
 			return;
         }
@@ -95,12 +93,10 @@ public class WalkTowardsTheLight extends Player {
 		ArrayList<LightConfiguration> bestConfigs = optimum.calcOptimumConfigs();
 		//LightConfiguration l = bestConfigs.get(0);
 		
-		for(LightConfiguration config : bestConfigs)
-		{
+		for(LightConfiguration config : bestConfigs) {
 			config.calculateOptimalDepths();
 			System.out.println("printing lights");
-			for(Point2D p : config.getLights())
-			{
+			for(Point2D p : config.getLights()) {
 				System.out.println(p.getX() + " " + p.getY());
 			}
 			System.out.println("area covered: " + config.areaCovered());
@@ -120,16 +116,12 @@ public class WalkTowardsTheLight extends Player {
 		int bestOn = 0;
 		int bestGap = 0;
 		LightConfiguration best = null;
-		for(LightConfiguration lc : lcs)
-		{
-			for(int on = 18; on < 30; on++)
-			{
-				for(int gap = 3; gap < 9; gap++)
-				{
+		for(LightConfiguration lc : lcs) {
+			for(int on = 18; on < 30; on++) {
+				for(int gap = 3; gap < 9; gap++) {
 				    lc.setOnAndGap(on, gap);
 					temp = runSimulator(lc.getActualLights(), lc.getCollector());
-					if(temp > bestRound)
-					{
+					if(temp > bestRound) {
 						bestRound = temp;
 						best = lc;
 						bestOn = on;
@@ -151,8 +143,7 @@ public class WalkTowardsTheLight extends Player {
 	}
 	
 	//returns the set of lights representing the largest center shape that can fit on the board
-	private HashSet<Light> getCentralShape(double displacement, int levels)
-	{
+	private HashSet<Light> getCentralShape(double displacement, int levels)	{
 		HashSet<Light> ret = new HashSet<Light>();
 		
 		Light l1 = new Light(baseX,baseY,1,1,0);
@@ -192,8 +183,7 @@ public class WalkTowardsTheLight extends Player {
 		if(numLights > 6)
 			ret.add(l11);
 		
-		if(numLights > 7)
-		{
+		if(numLights > 7) {
 			ret.add(l14);
 			ret.add(l15);
 			collector = new Collector(50, 50);
@@ -204,8 +194,6 @@ public class WalkTowardsTheLight extends Player {
 		
 		if(numLights > 9)
 			ret.add(l13);
-		
-		
 		
 		for(int i=ret.size(); i<numLights; i++)
 			ret.add(new Light(0,0,0,0,0));
@@ -231,6 +219,49 @@ public class WalkTowardsTheLight extends Player {
 				openGridSpots[i][j] = free;
 			}
 		}
+	}
+	
+	private static Set<Line2D> tightenWalls(Set<Line2D> wallSet) {
+	    List<Line2D> wallList = new ArrayList<Line2D>(wallSet);
+	    Line2D wall, otherWall;
+	    Point2D launchPoint;
+	    double m, m2, b, b2, x;
+	    for(int i = 0; i < wallList.size(); i++) {
+	        for(int j = i + 1; j < wallList.size(); j++) {
+	            wall = wallList.get(i);
+	            otherWall = wallList.get(j);
+	            launchPoint = null;
+	            
+	            if(!wall.intersectsLine(otherWall)) {
+	                if(otherWall.ptSegDist(wall.getP1()) < GAP_THRESHOLD) {
+	                    launchPoint = wall.getP1();
+	                } else if(otherWall.ptSegDist(wall.getP2()) < GAP_THRESHOLD) {
+	                    launchPoint = wall.getP2();
+	                }
+	                
+	                if(launchPoint != null) {
+	                    if(otherWall.getP1().distance(launchPoint) < GAP_THRESHOLD) {
+	                        wallList.add(new Line2D.Double(launchPoint, otherWall.getP1()));
+	                    } else if(otherWall.getP2().distance(launchPoint) < GAP_THRESHOLD) {
+	                        wallList.add(new Line2D.Double(launchPoint, otherWall.getP1()));
+	                    } else {
+	                        m = ((otherWall.getP2().getY() - otherWall.getP1().getY()) /
+	                                (otherWall.getP2().getX() - otherWall.getP1().getX()));
+	                        m2 = 1/m;
+	                        b = otherWall.getP2().getY() - (m * otherWall.getP2().getX());
+	                        b2 = launchPoint.getY() - (m2 * launchPoint.getX());
+	                        x = ((b2 - b) / (m - m2));
+	                        Point2D closest = new Point2D.Double(x, (m2 * x + b2));
+	                        if(otherWall.contains(closest)) {
+	                            wallList.add(new Line2D.Double(launchPoint, closest));
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	    return (new HashSet<Line2D>(wallList));
 	}
 
 	@Override
