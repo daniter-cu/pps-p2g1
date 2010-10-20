@@ -121,8 +121,9 @@ public class LightConfiguration {
     		calculateStarts(1);
     	} else if(max == 2) {
     		calculateStarts(2);
+    	} else {
+    	    calculateStarts(3);
     	}
-    	else calculateStarts(3);
     	
 		actualLights = new HashSet<Light>();
 		Light l;
