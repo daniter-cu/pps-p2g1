@@ -40,7 +40,7 @@ public class SpaceFinder {
 			for(int j=0; j<100; j++)
 			{
 				Point2D.Double p = new Point2D.Double(i, j);
-				/*Iterator<Line2D> iter = walls.iterator();
+				Iterator<Line2D> iter = walls.iterator();
 				double mindist = 50;
 				double temp = 0;
 				while(iter.hasNext())
@@ -54,7 +54,7 @@ public class SpaceFinder {
 				{
 					center.setLocation(i, j);
 					radius = mindist;
-				}*/
+				}
 				//find area
 				points.add(p);
 				double area = LightConfiguration.calculateAreaCovered(points);
@@ -130,13 +130,11 @@ public class SpaceFinder {
 		return sorted;
 	}
 
-	@Deprecated
 	public double getRadius()
 	{
 		return radius;
 	}
 	
-	@Deprecated
 	public Point2D getCenter()
 	{
 		return center;
