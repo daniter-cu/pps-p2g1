@@ -16,6 +16,7 @@ import mosquito.sim.Collector;
 import mosquito.sim.GameListener;
 import mosquito.sim.Light;
 import mosquito.sim.Player;
+import mosquito.sim.GameListener.GameUpdateType;
 
 import org.apache.log4j.Logger;
 
@@ -40,11 +41,13 @@ public class WalkTowardsTheLight extends Player {
 	private static Collector simCollector;
 	private static Set<Light> simLights;
 	
+	private static int MAX_ROUNDS = 3000;
+	private static int MIN_ON = 17;
+	private static int MAX_ON = 35;
+	private static final int TRIALS = 5;
 	private final static double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
-    private final static int GAP_THRESHOLD = 1;
-	private final static int MAX_ROUNDS = 3000;
-	private final static int MIN_ON = 18;
-	private final static int MAX_ON = 30;
+    private final static double GAP_THRESHOLD = 0.6;
+	private static double CRITICAL_RADIUS = 2*Math.sqrt(2.0 * Math.pow(9, 2)) + 15.0;
 	
 	@Override
 	public String getName() {
@@ -96,6 +99,19 @@ public class WalkTowardsTheLight extends Player {
         else
         {
 			SpaceFinder finder = new SpaceFinder(this.walls);
+			
+			if(finder.getRadius() >= CRITICAL_RADIUS)
+			{
+				//System.out.println(finder.getRadius());
+				//System.out.println(CRITICAL_RADIUS);
+				baseX = finder.getCenter().getX();
+				baseY = finder.getCenter().getY();
+				Set<Light> bestLights = getCentralShape(DISPLACEMENTS[Math.min(numLights - 1, 9)], 2);
+	        	lights =  bestLights;
+	        	isSimulated = false;
+	        	return;
+			}
+			
 			LinkedList<Point2D> seeds = finder.getSeeds();
 			OptimizeConfiguration optimum = new OptimizeConfiguration(seeds, numLights);
 			
@@ -104,12 +120,12 @@ public class WalkTowardsTheLight extends Player {
 		
 		for(LightConfiguration config : bestConfigs) {
 			config.calculateOptimalDepths();
-			System.out.println("printing lights");
-			for(Light p : config.getActualLights())
-			{
-				System.out.println(p.getX() + " " + p.getY());
-			}
-			System.out.println("area covered: " + config.areaCovered());
+//			System.out.println("printing lights");
+//			for(Light p : config.getActualLights())
+//			{
+//				System.out.println(p.getX() + " " + p.getY());
+//			}
+//			System.out.println("area covered: " + config.areaCovered());
 		}
 		
 		LightConfiguration l = getBestConfig(bestConfigs);
@@ -117,13 +133,14 @@ public class WalkTowardsTheLight extends Player {
 		collector = l.getCollector();
 		lights =  l.getActualLights();
 		
-		System.out.println("collector: " + collector.getX() + " " + collector.getY());
+		//System.out.println("collector: " + collector.getX() + " " + collector.getY());
 
 	}
 	
 	private LightConfiguration getBestConfig(ArrayList<LightConfiguration> lcs) {
-		int bestRound = Integer.MAX_VALUE;
-		int temp = 0;
+		long startTime = System.currentTimeMillis();
+		long maxTime = 1000 * 60 * 30;
+		double bestRound = Integer.MAX_VALUE;
 		int bestOn = 0;
 		int bestGap = 0;
 		LightConfiguration best = null;
@@ -131,13 +148,23 @@ public class WalkTowardsTheLight extends Player {
 		{
 			for(int on = MIN_ON; on <= MAX_ON; on++)
 			{
-			    lc.setOnAndGap(on, 5);
-			    System.out.println("simulation started");
-				temp = runSimulator(lc.getActualLights(), lc.getCollector());
-			    System.out.println("simulation ended, num rounds: " + temp);
-				if(temp < bestRound)
+				double average = 0;
+				for(int i=0; i<TRIALS; i++)
 				{
-					bestRound = temp;
+				    lc.setOnAndGap(on, 5);
+				    //System.out.println("simulation started");
+					average += runSimulator(lc.getActualLights(), lc.getCollector());
+				    //System.out.println("simulation ended, num rounds: " + temp);
+					if(System.currentTimeMillis() - startTime > maxTime)
+					{
+						best.setOnAndGap(bestOn, bestGap);
+						return best;
+					}
+				}
+				average /= (double)TRIALS;
+				if(average < bestRound)
+				{
+					bestRound = average;
 					best = lc;
 					bestOn = on;
 					bestGap = 5;
@@ -145,7 +172,7 @@ public class WalkTowardsTheLight extends Player {
 			}
 		}
 		
-		System.out.println("best round: " + bestRound);
+		//System.out.println("best round: " + bestRound);
 		best.setOnAndGap(bestOn, bestGap);
 		return best;
 	}
@@ -163,7 +190,7 @@ public class WalkTowardsTheLight extends Player {
 		HashSet<Light> ret = new HashSet<Light>();
 		
 		Light l1 = new Light(baseX,baseY,1,1,0);
-		collector = new Collector(50.5, 50);
+		collector = new Collector(baseX + .5,baseY);
 		
 		int bonus= 0;
 		
@@ -212,7 +239,7 @@ public class WalkTowardsTheLight extends Player {
 		if(numLights > 7) {
 			ret.add(l14);
 			ret.add(l15);
-			collector = new Collector(50, 50);
+			collector = new Collector(baseX, baseY);
 		}
 		
 		if(numLights > 8)

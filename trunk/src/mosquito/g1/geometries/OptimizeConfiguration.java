@@ -44,7 +44,7 @@ public class OptimizeConfiguration {
 	 */
 	public LightConfiguration calcOptimumConfig() {
 		if(seedLights.size() == 0) {
-			System.err.println("No seed lights!");
+			//System.err.println("No seed lights!");
 			return null;
 		}
 		

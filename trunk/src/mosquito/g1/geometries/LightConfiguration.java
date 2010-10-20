@@ -258,7 +258,7 @@ public class LightConfiguration {
 					
 					if(intersects)
 						fix += .0001;
-					System.out.println("fix: " + fix);
+					//System.out.println("fix: " + fix);
 				}
 					
 			}
