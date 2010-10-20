@@ -11,10 +11,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-
+/**
+ * A class responsible for finding a chunk of space for lights
+ * @author Dan Iter
+ */
 public class SpaceFinder {
-	
-	private Logger log = Logger.getLogger(this.getClass());
+	@SuppressWarnings("unused")
+    private Logger log = Logger.getLogger(this.getClass());
 	private double radius;
 	private Point2D center;
 	private LinkedList<OurLight> seeds; 
