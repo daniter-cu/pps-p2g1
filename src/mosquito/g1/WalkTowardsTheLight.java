@@ -42,11 +42,11 @@ public class WalkTowardsTheLight extends Player {
 	private static Set<Light> simLights;
 	
 	private static int MAX_ROUNDS = 3000;
-	private static int MIN_ON = 17;
-	private static int MAX_ON = 35;
-	private static final int TRIALS = 5;
+	private static int MIN_ON = 20;
+	private static int MAX_ON = 20;
+	private static final int TRIALS = 15;
 	private final static double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
-    private final static double GAP_THRESHOLD = 0.6;
+    private final static double GAP_THRESHOLD = 0.7;
 	private static double CRITICAL_RADIUS = 2*Math.sqrt(2.0 * Math.pow(9, 2)) + 15.0;
 	
 	@Override
@@ -133,7 +133,7 @@ public class WalkTowardsTheLight extends Player {
 		collector = l.getCollector();
 		lights =  l.getActualLights();
 		
-		//System.out.println("collector: " + collector.getX() + " " + collector.getY());
+		System.out.println("collector: " + collector.getX() + " " + collector.getY());
 
 	}
 	
@@ -154,7 +154,7 @@ public class WalkTowardsTheLight extends Player {
 				    lc.setOnAndGap(on, 5);
 				    //System.out.println("simulation started");
 					average += runSimulator(lc.getActualLights(), lc.getCollector());
-				    //System.out.println("simulation ended, num rounds: " + temp);
+//				    System.out.println("simulation ended, num rounds: " + temp);
 					if(System.currentTimeMillis() - startTime > maxTime)
 					{
 						best.setOnAndGap(bestOn, bestGap);
@@ -169,10 +169,11 @@ public class WalkTowardsTheLight extends Player {
 					bestOn = on;
 					bestGap = 5;
 				}
+				System.out.println("simulation ended, avg rounds: " + average);
 			}
 		}
 		
-		//System.out.println("best round: " + bestRound);
+		System.out.println("best round: " + bestRound + " time: " + (System.currentTimeMillis() - startTime));
 		best.setOnAndGap(bestOn, bestGap);
 		return best;
 	}
