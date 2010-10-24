@@ -64,7 +64,7 @@ public class SpaceFinder {
 				addNprune(l);
 			}
 		}
-		//Collections.shuffle(seeds);
+		Collections.shuffle(seeds);
 		/*log.debug("THESE ARE THE SEED POINTS:");
 		for(OurLight a : seeds)
 		{
