@@ -21,10 +21,10 @@ public class LightConfiguration {
     public static final double COLLECTOR_OFFSET = 0.5;
     
     private int cycleGap = 5;
-    private int cycleOn = 23;
+    private int cycleOn = 20;
+    
     private int cycleLength = (cycleOn * 2) + cycleGap;
     private double areaCovered = 0;
-    
     private ArrayList<Point2D> lightSet;
     private static Set<Line2D> board;
     
