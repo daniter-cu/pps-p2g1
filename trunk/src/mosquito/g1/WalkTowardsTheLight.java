@@ -42,11 +42,11 @@ public class WalkTowardsTheLight extends Player {
 	private static Set<Light> simLights;
 	
 	private static int MAX_ROUNDS = 3000;
-	private static int MIN_ON = 20;
-	private static int MAX_ON = 20;
-	private static final int TRIALS = 15;
+	private static int MIN_ON = 18;
+	private static int MAX_ON = 22;
+	private static final int TRIALS = 1;
 	private final static double []DISPLACEMENTS = {0,14,14,14,14,13,12,11,10,9};
-    private final static double GAP_THRESHOLD = 0.7;
+    private final static double GAP_THRESHOLD = 0;
 	private static double CRITICAL_RADIUS = 2*Math.sqrt(2.0 * Math.pow(9, 2)) + 15.0;
 	
 	@Override
